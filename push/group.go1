@@ -1,0 +1,47 @@
+package push
+
+import (
+	"context"
+	"net"
+)
+
+//Reply ..
+type GroupReply struct {
+	R         int8
+	GroupAddr string
+}
+
+type Admin struct{}
+
+type GroupRequestInfo struct {
+	GID       uint32
+	GateWayID uint32
+}
+
+func (a *Admin) CreateGroup(ctx context.Context, group *GroupRequestInfo, reply *GroupReply) error {
+	if _, isExist := GroupList.Load(group.GID); isExist {
+		reply.R = 1
+		return nil
+	} else {
+		ga, err := createGroupListener()
+		if err == nil {
+			reply.R = 0
+			reply.GroupAddr = ga
+
+			return nil
+		}
+		return err
+	}
+}
+
+// func (a *Admin) SelectGroup(ctx context.Context, reply *Reply) {}
+// func (a *Admin) UpdateGroup(ctx context.Context, reply *Reply) {}
+// func (a *Admin) DelectGroup(ctx context.Context, reply *Reply) {}
+
+func createGroupListener() (string, error) {
+	addr, err := net.ResolveUDPAddr("udp4", "0.0.0.0:0")
+	if err != nil {
+		return "", err
+	}
+	return addr.String(), nil
+}
