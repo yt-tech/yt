@@ -3,6 +3,7 @@ package gateway
 import (
 	"context"
 	"log"
+	"yt/proto"
 
 	"github.com/smallnest/rpcx/client"
 )
@@ -13,7 +14,11 @@ type UserGroupRequestInfo struct {
 	UserID    uint64
 }
 
-func joinGroup(xcli client.XClient) {
+func joinGroupAction(a proto.ActionRequest, xcli client.XClient) int8 {
+	return joinGroup(a, xcli)
+}
+
+func joinGroup(a proto.ActionRequest, xcli client.XClient) int8 {
 	args := &UserGroupRequestInfo{
 		GatewayID: requestGatewayID,
 		GroupID:   1,
@@ -23,7 +28,7 @@ func joinGroup(xcli client.XClient) {
 	err := xcli.Call(context.Background(), "JoinGroup", args, reply)
 	if err != nil {
 		log.Fatalf("failed to call: %v", err)
-		return
+		return -1
 	}
 	switch reply.R {
 	case 1:
@@ -33,4 +38,5 @@ func joinGroup(xcli client.XClient) {
 	default:
 		log.Printf("reply=%d", reply.R)
 	}
+	return reply.R
 }

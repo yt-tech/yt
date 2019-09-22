@@ -11,13 +11,15 @@ import (
 	"log"
 	"math/big"
 	"os"
-	"yt/proto"
 
 	ggproto "github.com/gogo/protobuf/proto"
 	quic "github.com/lucas-clemente/quic-go"
 	"github.com/smallnest/rpcx/client"
 	"github.com/smallnest/rpcx/protocol"
 )
+
+type pServerInfo struct {
+}
 
 const addr = "localhost:4242"
 
@@ -41,7 +43,6 @@ func QuicServer() {
 		}
 	}()
 	gwRegiste(xclient)
-
 	listener, err := quic.ListenAddr(addr, generateTLSConfig(), nil)
 	if err != nil {
 		panic(err)
@@ -64,22 +65,54 @@ func QuicServer() {
 					if err != nil {
 						mlog.Println(err)
 					}
-					var a proto.ActionRequest
-					ggproto.Unmarshal(readBuff[:n], &a)
-					switch a.GetId() {
+					var gt *gtInfo
+					ggproto.Unmarshal(readBuff[:n], gt.action)
+					switch gt.action.GetActionID() {
 					case 1:
-						logingo(a, xmclient)
+						gt.connectAction(xmclient)
+						bf, _ := ggproto.Marshal(gt.action)
+						stream.Write(bf)
 					case 2:
 					case 3:
+						reply := loginAction(a, xmclient)
+						a.ActionID = 2
+						a.Ack = int32(reply)
+						bf, _ := ggproto.Marshal(&a)
+						stream.Write(bf)
+					case 4:
+					case 5:
+						reply := loginAction(a, xmclient)
+						a.ActionID = 2
+						a.Ack = int32(reply)
+						bf, _ := ggproto.Marshal(&a)
+						stream.Write(bf)
+					case 6:
+					case 7:
+						reply := loginAction(a, xmclient)
+						a.ActionID = 2
+						a.Ack = int32(reply)
+						bf, _ := ggproto.Marshal(&a)
+						stream.Write(bf)
+					case 8:
+					case 9:
+						reply := loginAction(a, xmclient)
+						a.ActionID = 2
+						a.Ack = int32(reply)
+						bf, _ := ggproto.Marshal(&a)
+						stream.Write(bf)
+					case 10:
+					case 11:
+						reply := loginAction(a, xmclient)
+						a.ActionID = 2
+						a.Ack = int32(reply)
+						bf, _ := ggproto.Marshal(&a)
+						stream.Write(bf)
+					case 12:
 					}
 				}
 			}
 		}()
 	}
-}
-
-func logingo(a proto.ActionRequest, xm client.XClient) {
-	login1(a.GetUid(), xm)
 }
 
 // Setup a bare-bones TLS config for the server
