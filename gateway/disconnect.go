@@ -6,7 +6,7 @@ import (
 	"github.com/smallnest/rpcx/client"
 )
 
-func (c *gtInfo) connect(xcli client.XClient) {
+func (c *gtInfo) disconnect(xcli client.XClient) {
 	err := xcli.Call(context.Background(), "Login", c.action, &c.reply)
 	if err != nil {
 		mlog.Fatalf("failed to call: %v", err)

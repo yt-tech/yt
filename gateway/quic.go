@@ -29,20 +29,25 @@ var mlog = log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile)
 
 //QuicServer Start a server that echos all data on the first stream opened by the client
 func QuicServer() {
-	ch := make(chan *protocol.Message)
-	chm := make(chan *protocol.Message)
+	pch := make(chan *protocol.Message)
+	mch := make(chan *protocol.Message)
 	d := client.NewPeer2PeerDiscovery("tcp@"+pushServerAddr, "")
 	dm := client.NewPeer2PeerDiscovery("tcp@"+ManagerServerAddr, "")
-	xclient := client.NewBidirectionalXClient("GatewayRoot", client.Failtry, client.RandomSelect, d, client.DefaultOption, ch)
-	xmclient := client.NewBidirectionalXClient("Manager", client.Failtry, client.RandomSelect, dm, client.DefaultOption, chm)
-	defer xclient.Close()
-	defer xmclient.Close()
+	pxclient := client.NewBidirectionalXClient("GatewayRoot", client.Failtry, client.RandomSelect, d, client.DefaultOption, pch)
+	mxclient := client.NewBidirectionalXClient("Manager", client.Failtry, client.RandomSelect, dm, client.DefaultOption, mch)
+	defer pxclient.Close()
+	defer mxclient.Close()
 	go func() {
-		for msg := range ch {
-			fmt.Printf("receive msg from server: %s\n", msg.Payload)
+		for msg := range pch {
+			fmt.Printf("receive pch msg from server: %s\n", msg.Payload)
 		}
 	}()
-	gwRegiste(xclient)
+	go func() {
+		for msg := range mch {
+			fmt.Printf("receive mch msg from server: %s\n", msg.Payload)
+		}
+	}()
+	gwRegiste(pxclient)
 	listener, err := quic.ListenAddr(addr, generateTLSConfig(), nil)
 	if err != nil {
 		panic(err)
@@ -53,65 +58,42 @@ func QuicServer() {
 		if err != nil {
 			panic(err)
 		}
-		go func() {
+		go func(sess quic.Session) {
 			for {
 				stream, err := sess.AcceptStream(context.Background())
 				if err != nil {
 					panic(err)
 				}
 				readBuff := make([]byte, 1024)
+				var gt *gtInfo
 				for {
 					n, err := stream.Read(readBuff)
 					if err != nil {
-						mlog.Println(err)
+						mlog.Panic(err)
 					}
-					var gt *gtInfo
 					ggproto.Unmarshal(readBuff[:n], gt.action)
 					switch gt.action.GetActionID() {
 					case 1:
-						gt.connectAction(xmclient)
-						bf, _ := ggproto.Marshal(gt.action)
-						stream.Write(bf)
-					case 2:
+						gt.connect(mxclient)
 					case 3:
-						reply := loginAction(a, xmclient)
-						a.ActionID = 2
-						a.Ack = int32(reply)
-						bf, _ := ggproto.Marshal(&a)
-						stream.Write(bf)
-					case 4:
+						gt.joinGroup(mxclient)
+						gt.joinGroup(pxclient)
 					case 5:
-						reply := loginAction(a, xmclient)
-						a.ActionID = 2
-						a.Ack = int32(reply)
-						bf, _ := ggproto.Marshal(&a)
-						stream.Write(bf)
-					case 6:
+						gt.leaveGroup(pxclient)
 					case 7:
-						reply := loginAction(a, xmclient)
-						a.ActionID = 2
-						a.Ack = int32(reply)
-						bf, _ := ggproto.Marshal(&a)
-						stream.Write(bf)
-					case 8:
+						gt.holdMic(pxclient)
 					case 9:
-						reply := loginAction(a, xmclient)
-						a.ActionID = 2
-						a.Ack = int32(reply)
-						bf, _ := ggproto.Marshal(&a)
-						stream.Write(bf)
-					case 10:
+						gt.releaseMic(pxclient)
 					case 11:
-						reply := loginAction(a, xmclient)
-						a.ActionID = 2
-						a.Ack = int32(reply)
-						bf, _ := ggproto.Marshal(&a)
-						stream.Write(bf)
-					case 12:
+						gt.disconnect(mxclient)
+					default:
+						mlog.Println("--------")
 					}
+					bf, _ := ggproto.Marshal(gt.action)
+					stream.Write(bf)
 				}
 			}
-		}()
+		}(sess)
 	}
 }
 

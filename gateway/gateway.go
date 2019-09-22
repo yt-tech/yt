@@ -2,16 +2,26 @@ package gateway
 
 import (
 	"context"
+	"yt/proto"
 
 	"github.com/smallnest/rpcx/client"
 )
 
+type gtInfo struct {
+	action *proto.ActionRequest
+	reply  uint8
+}
+
+//GatewayRoot ..
 type GatewayRoot struct{}
 
+//GateWayRegisteInfo ..
 type GateWayRegisteInfo struct {
 	ID              uint32
 	ReceiveListener string
 }
+
+//GateWayReply ..
 type GateWayReply struct {
 	R int8
 }
