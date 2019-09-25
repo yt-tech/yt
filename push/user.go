@@ -27,7 +27,7 @@ type UserGroupRequestInfo struct {
 var mlog = log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile)
 
 //JoinGroup ..
-func (g *GatewayRoot) JoinGroup(ctx context.Context, ur *UserGroupRequestInfo, reply *Reply) error {
+func (g *PushServer) JoinGroup(ctx context.Context, ur *UserGroupRequestInfo, reply *Reply) error {
 	_, isExist := GateWayList.Load(ur.GatewayID) //检查网关注册
 	if !isExist {                                //网关没有注册
 		reply.R = -1

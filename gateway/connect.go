@@ -6,17 +6,11 @@ import (
 	"github.com/smallnest/rpcx/client"
 )
 
-func (c *gtInfo) connect(xcli client.XClient) {
-	err := xcli.Call(context.Background(), "Login", c.action, &c.reply)
+func (c *gtInfo) connect(xcli client.XClient) (uint8, error) {
+	err := xcli.Call(context.Background(), "UserConnect", c.action, &c.reply)
 	if err != nil {
 		mlog.Fatalf("failed to call: %v", err)
+		return 0, err
 	}
-	switch c.reply {
-	case 1:
-		mlog.Printf("reply=%d", c.reply)
-	case 2:
-		mlog.Printf("reply=%d", c.reply)
-	default:
-		mlog.Printf("reply=%d", c.reply)
-	}
+	return c.reply, nil
 }

@@ -2,17 +2,18 @@ package manager
 
 import (
 	"context"
-	"yt/proto"
+	"yt/ytproto"
 )
 
 //Manager ..
 type Manager struct{}
 
-func (m *Manager) userConnect(ctx context.Context, li *proto.ActionRequest, reply uint8) error {
+//UserConnect ..
+func (m *Manager) UserConnect(ctx context.Context, li *ytproto.ActionRequest, reply *uint8) error {
 	if loginQurey(li.GetUid()) {
-		reply = 1
+		*reply = 1
 	} else {
-		reply = 0
+		*reply = 0
 	}
 	return nil
 }

@@ -12,7 +12,7 @@ import (
 
 var GateWayList sync.Map //key:GatewayID  value:*GateWayInfo
 
-type GatewayRoot struct{}
+type PushServer struct{}
 
 type GateWayInfo struct {
 	TCP net.Conn
@@ -28,7 +28,7 @@ type GateWayReply struct {
 }
 
 //GatewayRegiste ..
-func (g *GatewayRoot) GatewayRegiste(ctx context.Context, gwri *GateWayRegisteInfo, reply *GateWayReply) error {
+func (g *PushServer) GatewayRegiste(ctx context.Context, gwri *GateWayRegisteInfo, reply *GateWayReply) error {
 	rlAddr, err := createGateWayReceiveListener(gwri.ReceiveListener)
 	if gwri.ID < 1 {
 		return errors.New("GatewayID")

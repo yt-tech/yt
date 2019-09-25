@@ -19,7 +19,8 @@ func main() {
 		client.Start()
 	case "g": //gateway
 		fmt.Println("start gateway")
-		gateway.QuicServer()
+		// gateway.QuicServer()
+		gateway.Start()
 	case "m": //
 		fmt.Println("start manager")
 		manager.StartManager()

@@ -1,7 +1,7 @@
 //指定版本
 syntax = "proto3";
 //包名，通过protoc生成时go文件时
-package proto;
+package ytproto;
 
 message ActionRequest {
     ActionType actionID = 1;

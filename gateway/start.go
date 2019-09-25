@@ -1,13 +1,16 @@
 package gateway
 
+import "time"
+
 var (
-	pushServerAddr     = "localhost:8972"
-	ManagerServerAddr  = "localhost:8973"
-	requestGatewayID   = uint32(2)
-	requestUserID      = uint64(2)
-	gatewayUDPListener = "127.0.0.1:6678"
+	pushServerAddr    = "localhost:8972"
+	managerServerAddr = "localhost:8973"
+	requestGatewayID  = uint32(2)
+	requestUserID     = uint64(2)
 )
 
 func Start() {
-
+	go gatewayRegister()
+	time.Sleep(3e9)
+	QuicServer()
 }

@@ -11,6 +11,8 @@ import (
 	"log"
 	"math/big"
 	"os"
+	"yt/proto"
+	"yt/ytproto"
 
 	ggproto "github.com/gogo/protobuf/proto"
 	quic "github.com/lucas-clemente/quic-go"
@@ -18,12 +20,7 @@ import (
 	"github.com/smallnest/rpcx/protocol"
 )
 
-type pServerInfo struct {
-}
-
-const addr = "localhost:4242"
-
-const message = "foobar"
+type pServerInfo struct{}
 
 var mlog = log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile)
 
@@ -32,8 +29,8 @@ func QuicServer() {
 	pch := make(chan *protocol.Message)
 	mch := make(chan *protocol.Message)
 	d := client.NewPeer2PeerDiscovery("tcp@"+pushServerAddr, "")
-	dm := client.NewPeer2PeerDiscovery("tcp@"+ManagerServerAddr, "")
-	pxclient := client.NewBidirectionalXClient("GatewayRoot", client.Failtry, client.RandomSelect, d, client.DefaultOption, pch)
+	dm := client.NewPeer2PeerDiscovery("tcp@"+managerServerAddr, "")
+	pxclient := client.NewBidirectionalXClient("PushServer", client.Failtry, client.RandomSelect, d, client.DefaultOption, pch)
 	mxclient := client.NewBidirectionalXClient("Manager", client.Failtry, client.RandomSelect, dm, client.DefaultOption, mch)
 	defer pxclient.Close()
 	defer mxclient.Close()
@@ -43,12 +40,29 @@ func QuicServer() {
 		}
 	}()
 	go func() {
+		var msgProto ytproto.Man
 		for msg := range mch {
 			fmt.Printf("receive mch msg from server: %s\n", msg.Payload)
+			ggproto.Unmarshal(msg.Payload, &msgProto)
+			userlist.RLock()
+			defer userlist.RUnlock()
+			for _, uid := range msgProto.GetUid() {
+				sendToUser, ok := userlist.ul[uid]
+				if ok && sendToUser != nil {
+					sendToUser.Write(msg.Payload)
+				}
+			}
 		}
 	}()
-	gwRegiste(pxclient)
-	listener, err := quic.ListenAddr(addr, generateTLSConfig(), nil)
+	ar := &argsInfo{
+		ID:       gatewayID,
+		Listener: gatewayUDPListener,
+	}
+	g := &RegisteInfo{
+		args: ar,
+	}
+	g.registe2manager(mxclient)
+	listener, err := quic.ListenAddr(quicaddr, generateTLSConfig(), nil)
 	if err != nil {
 		panic(err)
 
@@ -58,32 +72,51 @@ func QuicServer() {
 		if err != nil {
 			panic(err)
 		}
-		go func(sess quic.Session) {
+		go func() {
 			for {
 				stream, err := sess.AcceptStream(context.Background())
 				if err != nil {
 					panic(err)
 				}
 				readBuff := make([]byte, 1024)
-				var gt *gtInfo
+				var userRequest proto.ActionRequest
 				for {
 					n, err := stream.Read(readBuff)
 					if err != nil {
-						mlog.Panic(err)
+						mlog.Println(err)
+						return
 					}
-					ggproto.Unmarshal(readBuff[:n], gt.action)
-					switch gt.action.GetActionID() {
+					err = ggproto.Unmarshal(readBuff[:n], &userRequest)
+					if err != nil {
+						mlog.Println(err)
+						return
+					}
+					var gt = &gtInfo{
+						action: &userRequest,
+					}
+					switch userRequest.GetActionID() {
 					case 1:
-						gt.connect(mxclient)
+						if reply, err := gt.connect(mxclient); err == nil {
+							switch {
+							case reply == 1 || reply == 2:
+								sendStream, _ := sess.OpenUniStream()
+								userlist.Lock()
+								userlist.ul[gt.action.GetUid()] = sendStream
+								userlist.Unlock()
+							default:
+								mlog.Println("?")
+							}
+						} else {
+							break
+						}
 					case 3:
 						gt.joinGroup(mxclient)
-						gt.joinGroup(pxclient)
 					case 5:
-						gt.leaveGroup(pxclient)
+						gt.leaveGroup(mxclient)
 					case 7:
-						gt.holdMic(pxclient)
+						gt.holdMic(mxclient)
 					case 9:
-						gt.releaseMic(pxclient)
+						gt.releaseMic(mxclient)
 					case 11:
 						gt.disconnect(mxclient)
 					default:
@@ -93,7 +126,7 @@ func QuicServer() {
 					stream.Write(bf)
 				}
 			}
-		}(sess)
+		}()
 	}
 }
 

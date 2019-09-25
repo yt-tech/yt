@@ -7,42 +7,36 @@ import (
 	"github.com/smallnest/rpcx/client"
 )
 
+const gatewayID = uint32(1)
+const gatewayUDPListener = "127.0.0.1:9003"
+const quicaddr = "127.0.0.1:9002"
+
 type gtInfo struct {
 	action *proto.ActionRequest
 	reply  uint8
 }
 
-//GatewayRoot ..
-type GatewayRoot struct{}
-
-//GateWayRegisteInfo ..
-type GateWayRegisteInfo struct {
-	ID              uint32
-	ReceiveListener string
+//RegisteInfo ..
+type RegisteInfo struct {
+	args  *argsInfo
+	reply uint8
+}
+type argsInfo struct {
+	ID       uint32
+	Listener string
 }
 
-//GateWayReply ..
-type GateWayReply struct {
-	R int8
-}
-
-func gwRegiste(xcli client.XClient) {
-
-	args := &GateWayRegisteInfo{
-		ID:              requestGatewayID,
-		ReceiveListener: gatewayUDPListener,
-	}
-	reply := &GateWayReply{}
-	err := xcli.Call(context.Background(), "GatewayRegiste", args, reply)
+func (g *RegisteInfo) registe2manager(xcli client.XClient) {
+	err := xcli.Call(context.Background(), "GatewayRegiste", g.args, &g.reply)
 	if err != nil {
 		mlog.Fatalf("failed to call: %v", err)
 	}
-	switch reply.R {
+	switch g.reply {
 	case 1:
-		mlog.Printf("gwRegiste reply=%d", reply.R)
+		mlog.Printf("gwRegiste reply=%d", g.reply)
 	case 2:
-		mlog.Printf("gwRegiste reply=%d", reply.R)
+		mlog.Printf("gwRegiste reply=%d", g.reply)
 	default:
-		mlog.Printf("gwRegiste reply=%d", reply.R)
+		mlog.Printf("gwRegiste reply=%d", g.reply)
 	}
 }
