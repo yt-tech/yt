@@ -32,7 +32,7 @@ func NewMaster(endpoints []string, watchPath string) (*Master, error) {
 	})
 
 	if err != nil {
-		log.Fatal(err)
+		mlog.Fatal(err)
 		return nil, err
 	}
 

@@ -10,6 +10,8 @@ var gwList = struct {
 	m map[string]string
 }{m: make(map[string]string, 10)}
 
+const etcdAddr = "http://127.0.0.1:2379"
+
 func getGateway() string {
 	var gwaddr string
 	gwList.RLock()
@@ -22,10 +24,7 @@ func getGateway() string {
 }
 
 func gatewayWatcher() {
-	m, err := NewMaster(
-		[]string{
-			"http://127.0.0.1:2379",
-		}, "gateway_list/")
+	m, err := NewMaster([]string{etcdAddr}, "gateway_list/")
 
 	if err != nil {
 		mlog.Fatal(err)

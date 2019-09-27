@@ -2,22 +2,14 @@ package gateway
 
 import (
 	"context"
-
-	"github.com/smallnest/rpcx/client"
+	managerproto "yt/rpcproto"
 )
 
-func (c *gtInfo) joinGroup(xcli client.XClient) {
-
-	err := xcli.Call(context.Background(), "JoinGroup", c.action, &c.reply)
-	if err != nil {
-		mlog.Fatalf("failed to call: %v", err)
+func (c *gtInfo) joinGroup(cli managerproto.DataClient) {
+	mlog.Println("gateway joinGroup")
+	var i = &managerproto.GroupToInfo{
+		Uid: 3,
+		Gid: 10,
 	}
-	switch c.reply {
-	case 1:
-		mlog.Printf("joinGroup reply=%d", c.reply)
-	case 2:
-		mlog.Printf("joinGroup reply=%d", c.reply)
-	default:
-		mlog.Printf("joinGroup reply=%d", c.reply)
-	}
+	cli.JoinGroup(context.Background(), i)
 }

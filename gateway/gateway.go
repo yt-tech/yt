@@ -2,7 +2,7 @@ package gateway
 
 import (
 	"context"
-	"yt/proto"
+	"yt/ytproto"
 
 	"github.com/smallnest/rpcx/client"
 )
@@ -12,7 +12,7 @@ const gatewayUDPListener = "127.0.0.1:9003"
 const quicaddr = "127.0.0.1:9002"
 
 type gtInfo struct {
-	action *proto.ActionRequest
+	action *ytproto.ActionRequest
 	reply  uint8
 }
 

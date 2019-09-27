@@ -5,9 +5,9 @@ package ytproto;
 
 message ActionRequest {
     ActionType actionID = 1;
-    sint32 ack          = 2;
-    uint64 uid          = 3;
-    uint64 gid          = 4;
+    sint32     ack      = 2;
+    uint64     uid      = 3;
+    uint64     gid      = 4;
 }
 
 //协议类型
@@ -29,4 +29,12 @@ enum ActionType {
     REGISTERACK       = 14;
     SYSTEM            = 15;
     SYSTEMACK         = 16;
+}
+
+service Manager {
+    rpc JoinGroup (ActionRequest) returns (ActionRequest);
+    rpc LeaveGroup (ActionRequest) returns (ActionRequest);
+    rpc HoldMic (ActionRequest) returns (ActionRequest);
+    rpc ReleaseMic (ActionRequest) returns (ActionRequest);
+    rpc Broadcast (ActionRequest) returns (stream ActionRequest);
 }

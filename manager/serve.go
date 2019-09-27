@@ -1,6 +1,13 @@
 package manager
 
-import "github.com/smallnest/rpcx/server"
+import (
+	"log"
+	"net"
+	managerproto "yt/rpcproto"
+
+	"github.com/smallnest/rpcx/server"
+	"google.golang.org/grpc"
+)
 
 var addr = "localhost:8973"
 
@@ -9,7 +16,11 @@ var s *server.Server
 //StartManager ..
 func StartManager() {
 	connPG()
-	s = server.NewServer()
-	s.Register(new(Manager), "")
-	s.Serve("tcp", addr)
+	lis, err := net.Listen("tcp", addr)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	s := grpc.NewServer()
+	managerproto.RegisterDataServer(s, &Manager{})
+	s.Serve(lis)
 }

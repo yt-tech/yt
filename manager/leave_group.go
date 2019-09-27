@@ -2,11 +2,11 @@ package manager
 
 import (
 	"context"
-	"yt/ytproto"
+	managerproto "yt/rpcproto"
 )
 
 //LeaveGroup ..
-func (m *Manager) LeaveGroup(ctx context.Context, li *ytproto.ActionRequest, reply *uint8) error {
-	*reply = 1
-	return nil
+func (m *Manager) LeaveGroup(ctx context.Context, request *managerproto.GroupToInfo) (*managerproto.GroupToAckInfo, error) {
+
+	return nil, nil
 }

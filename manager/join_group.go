@@ -2,11 +2,17 @@ package manager
 
 import (
 	"context"
-	"yt/ytproto"
+	managerproto "yt/rpcproto"
 )
 
+//Manager ..
+type Manager struct{}
+
 //JoinGroup ..
-func (m *Manager) JoinGroup(ctx context.Context, li *ytproto.ActionRequest, reply *uint8) error {
-	*reply = 1
-	return nil
+func (m *Manager) JoinGroup(ctx context.Context, request *managerproto.GroupToInfo) (*managerproto.GroupToAckInfo, error) {
+	mlog.Println("manager JoinGroup")
+	var nl = &managerproto.GroupToAckInfo{
+		Id: 22,
+	}
+	return nl, nil
 }

@@ -3,7 +3,7 @@ package client
 import (
 	"crypto/tls"
 	"io"
-	"yt/proto"
+	"yt/ytproto"
 
 	ggproto "github.com/gogo/protobuf/proto"
 	"github.com/lucas-clemente/quic-go"
@@ -32,7 +32,7 @@ func openQuic() {
 			}
 			mlog.Println("Client: Got", inBuffer, stream.StreamID())
 			mlog.Println(inBuffer)
-			var rl proto.ActionRequest
+			var rl ytproto.ActionRequest
 			ggproto.Unmarshal(inBuffer, &rl)
 			mlog.Println(rl)
 			// inDataChannel <- inBuffer

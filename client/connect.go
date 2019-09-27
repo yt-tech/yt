@@ -1,13 +1,13 @@
 package client
 
 import (
-	"yt/proto"
+	"yt/ytproto"
 
 	ggproto "github.com/gogo/protobuf/proto"
 )
 
 func packConnectData() ([]byte, error) {
-	lr := &proto.ActionRequest{
+	lr := &ytproto.ActionRequest{
 		ActionID: 1,
 		Uid:      3,
 		Gid:      10,
@@ -16,7 +16,7 @@ func packConnectData() ([]byte, error) {
 }
 
 func packJoinGroupData() ([]byte, error) {
-	lr := &proto.ActionRequest{
+	lr := &ytproto.ActionRequest{
 		ActionID: 3,
 		Uid:      3,
 		Gid:      10,
@@ -24,7 +24,7 @@ func packJoinGroupData() ([]byte, error) {
 	return ggproto.Marshal(lr)
 }
 func packLeaveGroupData() ([]byte, error) {
-	lr := &proto.ActionRequest{
+	lr := &ytproto.ActionRequest{
 		ActionID: 5,
 		Uid:      3,
 		Gid:      10,
@@ -32,7 +32,7 @@ func packLeaveGroupData() ([]byte, error) {
 	return ggproto.Marshal(lr)
 }
 func packHoldMicData() ([]byte, error) {
-	lr := &proto.ActionRequest{
+	lr := &ytproto.ActionRequest{
 		ActionID: 7,
 		Uid:      3,
 		Gid:      10,
@@ -40,7 +40,7 @@ func packHoldMicData() ([]byte, error) {
 	return ggproto.Marshal(lr)
 }
 func packReleaseMicData() ([]byte, error) {
-	lr := &proto.ActionRequest{
+	lr := &ytproto.ActionRequest{
 		ActionID: 9,
 		Uid:      3,
 		Gid:      10,
@@ -49,7 +49,7 @@ func packReleaseMicData() ([]byte, error) {
 }
 
 func packDisconnectData() ([]byte, error) {
-	lr := &proto.ActionRequest{
+	lr := &ytproto.ActionRequest{
 		ActionID: 11,
 		Uid:      3,
 		Gid:      10,
