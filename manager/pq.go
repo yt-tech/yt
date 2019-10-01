@@ -19,17 +19,7 @@ func connPG() {
 		log.Fatal(err)
 	}
 }
-func loginQurey(uid uint64) bool {
-	// mlog.Printf("select data %d\n", uid)
-	// row := dbConn.QueryRow("SELECT uid FROM yt_user WHERE uid = $1", uid)
-	// var i uint64
-	// err := row.Scan(&i)
-	// if err != nil {
-	// 	mlog.Println(err)
-	// 	return false
-	// }
-	return true
-}
+
 func joinGroupQurey(uid uint64) bool {
 	return true
 }

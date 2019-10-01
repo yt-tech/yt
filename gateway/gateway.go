@@ -2,7 +2,7 @@ package gateway
 
 import (
 	"context"
-	"yt/ytproto"
+	command "yt/ytproto/cmd"
 
 	"github.com/smallnest/rpcx/client"
 )
@@ -10,11 +10,6 @@ import (
 const gatewayID = uint32(1)
 const gatewayUDPListener = "127.0.0.1:9003"
 const quicaddr = "127.0.0.1:9002"
-
-type gtInfo struct {
-	action *ytproto.ActionRequest
-	reply  uint8
-}
 
 //RegisteInfo ..
 type RegisteInfo struct {
@@ -24,6 +19,10 @@ type RegisteInfo struct {
 type argsInfo struct {
 	ID       uint32
 	Listener string
+}
+type gateway struct {
+	cmdMsg *command.Msg
+	result uint8
 }
 
 func (g *RegisteInfo) registe2manager(xcli client.XClient) {

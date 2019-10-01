@@ -6,18 +6,18 @@ import (
 	"github.com/smallnest/rpcx/client"
 )
 
-func (c *gtInfo) holdMic(xcli client.XClient) {
+func (c *gateway) holdMic(xcli client.XClient) {
 
-	err := xcli.Call(context.Background(), "HoldMic", c.action, &c.reply)
+	err := xcli.Call(context.Background(), "HoldMic", c.cmdMsg, &c.result)
 	if err != nil {
 		mlog.Fatalf("failed to call: %v", err)
 	}
-	switch c.reply {
+	switch c.result {
 	case 1:
-		mlog.Printf("holdMic reply=%d", c.reply)
+		mlog.Printf("holdMic result=%d", c.result)
 	case 2:
-		mlog.Printf("holdMic reply=%d", c.reply)
+		mlog.Printf("holdMic result=%d", c.result)
 	default:
-		mlog.Printf("holdMic reply=%d", c.reply)
+		mlog.Printf("holdMic result=%d", c.result)
 	}
 }

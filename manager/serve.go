@@ -3,7 +3,7 @@ package manager
 import (
 	"log"
 	"net"
-	managerproto "yt/rpcproto"
+	command "yt/ytproto/cmd"
 
 	"github.com/smallnest/rpcx/server"
 	"google.golang.org/grpc"
@@ -21,6 +21,8 @@ func StartManager() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	managerproto.RegisterDataServer(s, &Manager{})
+	manager := new(Manager)
+	command.RegisterManagerServer(s, manager)
 	s.Serve(lis)
+
 }

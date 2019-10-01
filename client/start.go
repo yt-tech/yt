@@ -16,10 +16,11 @@ func Start() {
 	gatewayAddr = getDisp()
 	mlog.Println(gatewayAddr)
 	go openQuic()
+	time.Sleep(1e9)
 	userConnect()
 	time.Sleep(2e9)
-	userJoinGroup()
-	time.Sleep(2e9)
-	userHoldMic()
+	subscribeTopic()
+	// time.Sleep(2e9)
+	// userHoldMic()
 	select {}
 }

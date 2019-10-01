@@ -10,8 +10,7 @@ import (
 	"log"
 	"math/big"
 	"os"
-	managerproto "yt/rpcproto"
-	"yt/ytproto"
+	command "yt/ytproto/cmd"
 
 	ggproto "github.com/gogo/protobuf/proto"
 	quic "github.com/lucas-clemente/quic-go"
@@ -20,7 +19,7 @@ import (
 
 type pServerInfo struct{}
 
-var mlog = log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile)
+var mlog = log.New(os.Stdout, "gateway ", log.LstdFlags|log.Lshortfile)
 
 //QuicServer Start a server that echos all data on the first stream opened by the client
 func QuicServer() {
@@ -30,15 +29,14 @@ func QuicServer() {
 	}
 	defer conn.Close()
 
-	grpcClient := managerproto.NewDataClient(conn)
-
 	listener, err := quic.ListenAddr(quicaddr, generateTLSConfig(), nil)
 	if err != nil {
 		panic(err)
 
 	}
+	grpcClient := command.NewManagerClient(conn)
 	go func() {
-		var r = &managerproto.BroadcastRegiste{}
+		var r = new(command.Msg)
 		gr, _ := grpcClient.Broadcast(context.Background(), r)
 		userlist.RLock()
 		defer userlist.RUnlock()
@@ -61,52 +59,82 @@ func QuicServer() {
 				if err != nil {
 					panic(err)
 				}
+				// go func() {
+				// 	audioStream, err := sess.AcceptUniStream(context.Background())
+				// 	if err != nil {
+				// 		mlog.Println(err)
+				// 	}
+				// 	audioBufferr := make([]byte, 512)
+				// 	for {
+				// 		n, err := audioStream.Read(audioBufferr)
+				// 		mlog.Println(n, err)
+				// 	}
+				// }()
 				readBuff := make([]byte, 1024)
-				var userRequest ytproto.ActionRequest
+				var requestMsg command.Msg
 				for {
 					n, err := stream.Read(readBuff)
 					if err != nil {
 						mlog.Println(err)
 						return
 					}
-					err = ggproto.Unmarshal(readBuff[:n], &userRequest)
+					err = ggproto.Unmarshal(readBuff[:n], &requestMsg)
 					if err != nil {
 						mlog.Println(err)
 						return
 					}
-					var gt = &gtInfo{
-						action: &userRequest,
+					var gt = &gateway{
+						cmdMsg: &command.Msg{},
 					}
-					switch userRequest.GetActionID() {
-					case 1:
+					switch requestMsg.GetCtype() {
+					case command.CommandType_ConnectRequest:
+						connectRequestUserID := requestMsg.Request.Connect.GetUid()
 						if err == nil {
 							var reply = 1
 							switch {
 							case reply == 1 || reply == 2:
-								sendStream, _ := sess.OpenUniStream()
-								userlist.Lock()
-								userlist.ul[gt.action.GetUid()] = sendStream
-								userlist.Unlock()
+								connectResponse, err := gt.connect(grpcClient, connectRequestUserID)
+								if err != nil {
+									sess.Close()
+									mlog.Println(err)
+								} else {
+									sendStream, _ := sess.OpenUniStream()
+									userlist.Lock()
+									userlist.ul[connectRequestUserID] = sendStream
+									userlist.Unlock()
+								}
+								rs := &command.Msg{
+									Ctype: command.CommandType_ConnectResponse,
+									Response: &command.Response{
+										ConnectAck: connectResponse,
+									},
+								}
+								bf, _ := rs.Marshal()
+								stream.Write(bf)
 							default:
 								mlog.Println("?")
 							}
 						} else {
+							sess.Close()
 							break
 						}
-					case 3:
-						gt.joinGroup(grpcClient)
-					case 5:
-						// gt.leaveGroup(mxclient)
-					case 7:
-						// gt.holdMic(mxclient)
-					case 9:
-						// gt.releaseMic(mxclient)
-					case 11:
-						// gt.disconnect(mxclient)
+					case command.CommandType_SubscribeTopicRequest:
+						subscribeTopicResponse, _ := gt.subscribeTopic(grpcClient, requestMsg.Request.Subscribe)
+						cm := &command.Msg{
+							Ctype: command.CommandType_SubscribeTopicResponse,
+							Response: &command.Response{
+								SubscribeAck: subscribeTopicResponse,
+							},
+						}
+						bf, _ := cm.Marshal()
+						stream.Write(bf)
+					case command.CommandType_HoldMicRequest:
+					case command.CommandType_ReleaseMicRequest:
+					case command.CommandType_DisconnectRequest:
 					default:
 						mlog.Println("--------")
 					}
-					bf, _ := ggproto.Marshal(gt.action)
+					bf, _ := ggproto.Marshal(gt.cmdMsg)
 					stream.Write(bf)
 				}
 			}

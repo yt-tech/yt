@@ -10,7 +10,7 @@ var (
 )
 
 func Start() {
-	go gatewayRegister()
-	time.Sleep(3e9)
+	// go gatewayRegister()
+	time.Sleep(1e9)
 	QuicServer()
 }

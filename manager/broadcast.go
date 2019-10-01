@@ -1,15 +1,18 @@
 package manager
 
 import (
-	managerproto "yt/rpcproto"
+	command "yt/ytproto/cmd"
 )
 
 //Broadcast ..
-func (m *Manager) Broadcast(r *managerproto.BroadcastRegiste, stream managerproto.Data_BroadcastServer) error {
-	mlog.Println(r.GetId())
-	var sn = &managerproto.BroadcastInfo{
-		Id: 1,
-	}
-	stream.Send(sn)
+func (m *Manager) Broadcast(r *command.Msg, stream command.Manager_BroadcastServer) error {
+
+	mlog.Println(r)
+	stream.Send(r)
+	return nil
+}
+
+//BroadcastRegiste ..
+func (m *Manager) BroadcastRegiste(r *command.BroadcastRegiste, stream command.Manager_BroadcastRegisteServer) error {
 	return nil
 }

@@ -2,11 +2,11 @@ package manager
 
 import (
 	"context"
-	managerproto "yt/rpcproto"
+	command "yt/ytproto/cmd"
 )
 
-//HoldMic ..
-func (m *Manager) HoldMic(ctx context.Context, request *managerproto.MicToInfo) (*managerproto.MicToAckInfo, error) {
+//HoldMicRequest ..
+func (m *Manager) HoldMicRequest(ctx context.Context, request *command.HoldMicRequestInfo) (*command.ManagerAck, error) {
 
 	return nil, nil
 }

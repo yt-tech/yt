@@ -11,5 +11,5 @@ require (
 	github.com/json-iterator/go v1.1.7
 	github.com/lucas-clemente/quic-go v0.12.0
 	github.com/smallnest/rpcx v0.0.0-20190919063354-2909d45c6dea
-	google.golang.org/grpc v1.20.1
+	google.golang.org/grpc v1.24.0
 )

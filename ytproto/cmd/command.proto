@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package  command;
+
+message BroadcastRegiste {
+    sint32 id    = 1;
+}
+enum CommandType {
+    UNKNOWN                   = 0;
+    ConnectRequest            = 1;
+    ConnectResponse           = 2;
+    SubscribeTopicRequest     = 3;
+    SubscribeTopicResponse    = 4;
+    UnsubscribeTopicRequest   = 5;
+    UnsubscribeTopicResponse  = 6;
+    HoldMicRequest            = 7;
+    HoldMIcResponse           = 8;
+    ReleaseMicRequest         = 9;
+    ReleaseMicResponse        =10;
+    DisconnectRequest         =11;
+    DisConnectResponse        =12;
+}
+
+message Msg {
+    CommandType  ctype        = 1;
+    Request      request      = 2;
+    Response     response     = 3;
+    AudioData    audioData    = 4;
+}
+message AudioData {
+    sint32 id       = 1;
+    bytes  data     = 2;
+}
+
+message Request {
+    ConnectRequestInfo          connect   = 1;
+    SubscribeTopicRequestInfo   subscribe = 2;
+}
+message Response {
+    ConnectResponseInfo         connectAck       = 1;
+    SubscribeTopicResponseInfo  subscribeAck     = 2;  
+}
+message ConnectRequestInfo {
+    uint64 uid            = 1;
+}
+message ConnectResponseInfo {
+    sint32 result         = 1;
+}
+message SubscribeTopicRequestInfo {
+    uint64 uid            = 1;
+    uint64 tid            = 2;
+}
+message SubscribeTopicResponseInfo{
+    sint32 result         = 1;
+}
+message UnsubscribeTopicRequestInfo {
+    sint32 id = 1;
+    string name = 2;
+}
+message UnsubscribeTopicResponseInfo{}
+message HoldMicRequestInfo {
+
+}
+message HoldMIcResponseInfo {}
+message ReleaseMicRequestInfo {
+
+}
+message ReleaseMicResponseInfo {}
+message DisconnectRequstInfo {
+
+}
+message DisConnectResponseInfo {}
+
+message ManagerAck {
+
+}
+message BroadcastRegisteInfo {
+    sint32 id = 1;
+}
+message BroadcastRegisteAckInfo {
+    sint32 id = 1;
+}
+service Manager {
+    rpc ConnectRequest (ConnectRequestInfo) returns (ConnectResponseInfo) {}
+    rpc SubscribeTopicRequest (SubscribeTopicRequestInfo) returns (SubscribeTopicResponseInfo) {}
+    // rpc UnsubscribeTopicRequest (UnsubscribeTopicRequestInfo) returns (ManagerAck) {}
+    rpc HoldMicRequest (HoldMicRequestInfo) returns (Msg) {}
+    // rpc ReleaseMicRequest (ReleaseMicRequestInfo) returns (ManagerAck) {}
+    rpc Broadcast (Msg) returns (stream Msg) {}
+    rpc BroadcastRegiste(BroadcastRegisteInfo) returns (stream BroadcastRegisteAckInfo) {}
+}

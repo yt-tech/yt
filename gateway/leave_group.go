@@ -6,18 +6,18 @@ import (
 	"github.com/smallnest/rpcx/client"
 )
 
-func (c *gtInfo) leaveGroup(xcli client.XClient) {
+func (c *gateway) leaveGroup(xcli client.XClient) {
 
-	err := xcli.Call(context.Background(), "leaveGroup", c.action, &c.reply)
+	err := xcli.Call(context.Background(), "leaveGroup", c.cmdMsg, &c.result)
 	if err != nil {
 		mlog.Fatalf("failed to call: %v", err)
 	}
-	switch c.reply {
+	switch c.result {
 	case 1:
-		mlog.Printf("leaveGroup reply=%d", c.reply)
+		mlog.Printf("leaveGroup result=%d", c.result)
 	case 2:
-		mlog.Printf("leaveGroup reply=%d", c.reply)
+		mlog.Printf("leaveGroup result=%d", c.result)
 	default:
-		mlog.Printf("leaveGroup reply=%d", c.reply)
+		mlog.Printf("leaveGroup result=%d", c.result)
 	}
 }

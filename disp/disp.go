@@ -8,7 +8,7 @@ import (
 	"github.com/gogf/gf/net/ghttp"
 )
 
-var mlog = log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile)
+var mlog = log.New(os.Stdout, "disp ", log.LstdFlags|log.Lshortfile)
 
 const dispAddr = 9001
 
