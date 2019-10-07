@@ -1,0 +1,9 @@
+[gateway]
+serverAddr             = "localhost:9001"
+cmdBroadcastListen     = "localhost:9003"
+audioBroadcastListen   = "localhost:9002"
+managerServerAddr      = "localhost:8001"
+
+[log]
+logFilePath            = "../log/gateway.log"
+logLevel               = "debug"
