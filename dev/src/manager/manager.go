@@ -14,8 +14,9 @@ var (
 
 type topicInfo struct {
 	sync.RWMutex
-	users    map[uint32]bool
 	gateways map[string]tp.Session
+	users    map[uint32]bool
+	holder   uint32
 }
 
 //Manager ..

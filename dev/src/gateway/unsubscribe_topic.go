@@ -8,11 +8,11 @@ import (
 	"github.com/lucas-clemente/quic-go"
 )
 
-func (g *gateway) subscribeTopic(rpcsess tp.Session, requestMsg *msg.Msg) {
+func (g *gateway) unsubscribeTopic(rpcsess tp.Session, requestMsg *msg.Msg) {
 	mlog.Println("gateway subscribe topic")
 
 	var result int32
-	rerr := rpcsess.Call("/manager/subscribetopic", requestMsg, &result).Rerror()
+	rerr := rpcsess.Call("/manager/unsubscribetopic", requestMsg, &result).Rerror()
 	if rerr.ToError() != nil {
 		mlog.Println(rerr.String())
 		return
@@ -44,7 +44,7 @@ func (g *gateway) subscribeTopic(rpcsess tp.Session, requestMsg *msg.Msg) {
 	localBroadcastPush(uid, tid, buff)
 }
 
-func subscriberTopicBytes(r int32) ([]byte, error) {
+func unsubscriberTopicBytes(r int32) ([]byte, error) {
 	ack := msgPool.Get().(*msg.Msg)
 	ack.Mid = msg.MsgID_SubscribeTopicID
 	ack.Command.SubscribeAck.Result = r
@@ -57,7 +57,7 @@ func subscriberTopicBytes(r int32) ([]byte, error) {
 }
 
 // 预存topic广播流地址
-func preStorageTopicBroadcastStream(uid, tid uint32, r int32) int32 {
+func preStorageTopicBroadcastStream1(uid, tid uint32, r int32) int32 {
 	sendStreamer, isExist := usersBroadcastStream.Load(uid)
 	if !isExist {
 		return 100

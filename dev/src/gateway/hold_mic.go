@@ -44,8 +44,8 @@ func newHoldMic(uid, tid uint32, r int32) int32 {
 	topic.Lock()
 	if topic.holder == 0 || topic.holder == uid {
 		topic.holder = uid
-		return 1
+		r = 1
 	}
 	topic.Unlock()
-	return 100
+	return r
 }

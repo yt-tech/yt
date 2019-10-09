@@ -7,7 +7,7 @@ import (
 )
 
 //Subscribetopic ..
-func (m *Manager) releasemic(requestMsg *msg.Msg) (result int32, terr *tp.Rerror) {
+func (m *Manager) holdmic(requestMsg *msg.Msg) (result int32, terr *tp.Rerror) {
 	mlog.Println("hold mic")
 	request := requestMsg.Command.GetHoldMic()
 	uid := request.GetUid()
@@ -17,7 +17,7 @@ func (m *Manager) releasemic(requestMsg *msg.Msg) (result int32, terr *tp.Rerror
 		if topic, ok := topicer.(*topicInfo); ok {
 			topic.Lock()
 			if topic.holder == 0 || topic.holder == uid {
-				topic.holder = 0
+				topic.holder = uid
 				result = 1
 			}
 			for k, v := range topic.gateways {

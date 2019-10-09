@@ -1,18 +1,11 @@
 package gateway
 
 import (
-	"sync"
 	"yt/ytproto/msg"
 
 	tp "github.com/henrylee2cn/teleport"
 	"github.com/lucas-clemente/quic-go"
 )
-
-var connectResponseInfoPool = sync.Pool{
-	New: func() interface{} {
-		return new(msg.ConnectAckInfo)
-	},
-}
 
 func (g *gateway) connectRequest(rpcsess tp.Session, sess quic.Session, stream quic.Stream, request *msg.ConnectInfo) error {
 	mlog.Println("ConnectRequest----------------------->>>>>")

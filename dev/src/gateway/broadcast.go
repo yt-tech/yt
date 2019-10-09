@@ -15,7 +15,7 @@ type Broadcast struct {
 }
 type usersOfTopic struct {
 	sync.RWMutex
-	m      map[uint32]quic.SendStream
+	users  map[uint32]quic.SendStream
 	holder uint32
 }
 
@@ -31,15 +31,15 @@ func localBroadcastPush(uid, tid uint32, buff []byte) {
 	if !isExist {
 		mlog.Println("broadcast topic is not exist")
 	}
-	users, ok := userser.(*usersOfTopic)
+	topic, ok := userser.(*usersOfTopic)
 	if !ok {
 		mlog.Println("no ok")
 	}
-	users.RLock()
-	for id, sendStream := range users.m {
+	topic.RLock()
+	for id, sendStream := range topic.users {
 		if id != uid {
 			sendStream.Write(buff)
 		}
 	}
-	users.RUnlock()
+	topic.RUnlock()
 }
