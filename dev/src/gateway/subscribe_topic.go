@@ -8,7 +8,7 @@ import (
 	"github.com/lucas-clemente/quic-go"
 )
 
-func (g *gateway) subscribeTopic(rpcsess tp.Session, requestMsg *msg.Msg) {
+func (y *ytClientInfo) subscribeTopic(rpcsess tp.Session, requestMsg *msg.Msg) {
 	mlog.Println("gateway subscribe topic")
 
 	var result int32
@@ -36,6 +36,7 @@ func (g *gateway) subscribeTopic(rpcsess tp.Session, requestMsg *msg.Msg) {
 		mlog.Println(err)
 		return
 	}
+	y.tid = tid
 	_, err = stream.Write(buff)
 	if err != nil {
 		mlog.Println(err)

@@ -20,6 +20,13 @@ func (g *gateway) holdMic(rpcsess tp.Session, message *msg.Msg) ([]byte, error) 
 		mlog.Println(rerr.String())
 		result = 500
 	}
+	if result == 1 {
+		if buff, err := holdMicBytes(message, result); err == nil {
+			mlog.Println("broadcast holdmic")
+			localBroadcastPush(uid, tid, buff)
+			return buff, err
+		}
+	}
 	return holdMicBytes(message, result)
 }
 func holdMicBytes(message *msg.Msg, r int32) ([]byte, error) {

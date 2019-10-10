@@ -10,6 +10,7 @@ require (
 	github.com/henrylee2cn/goutil v0.0.0-20190925102525-a28b3dc837cc // indirect
 	github.com/henrylee2cn/teleport v5.0.0+incompatible
 	github.com/jinzhu/gorm v1.9.11
+	github.com/json-iterator/go v1.1.7
 	github.com/lucas-clemente/quic-go v0.12.0
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/pelletier/go-toml v1.4.0

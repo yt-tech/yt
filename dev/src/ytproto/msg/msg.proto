@@ -22,7 +22,7 @@ enum MsgID {
 message Msg {
     MsgID       mid          = 1;
     Command     command      = 2;
-    AudioData   audioData    = 4;
+    AudioData   audioData    = 3;
 }
 message Command {
     ConnectInfo             connect        = 1;
@@ -40,7 +40,9 @@ message Command {
 }
 message AudioData {
     sint32 id       = 1;
-    bytes  data     = 2;
+    uint32 uid      = 2;
+    uint32 tid      = 3;
+    bytes  data     = 4;
 }
 
 message ConnectInfo {
