@@ -4,33 +4,32 @@ import (
 	"yt/ytproto/msg"
 
 	tp "github.com/henrylee2cn/teleport"
-	"github.com/lucas-clemente/quic-go"
 )
 
-func (g *gateway) connectRequest(rpcsess tp.Session, sess quic.Session, stream quic.Stream, request *msg.ConnectInfo) error {
+func (y *ytClientInfo) connectRequest(request *msg.ConnectInfo) error {
 	mlog.Println("ConnectRequest----------------------->>>>>")
 	var result int32
-	rerr := rpcsess.Call("/manager/connect", request, &result, tp.WithAddMeta("author", "henrylee2cn")).Rerror()
+	rerr := y.tpSession.Call("/manager/connect", request, &result, tp.WithAddMeta("author", "henrylee2cn")).Rerror()
 	if rerr.ToError() != nil {
 		mlog.Println(rerr)
 		return rerr.ToError()
 	}
-	broadcastStream, err := sess.OpenUniStream()
-	if err != nil {
-		mlog.Println(err)
-		return err
-	}
-	var uid = request.GetUid()
-	mlog.Println("broadcastWriteStream ID", broadcastStream.StreamID())
-	usersSession.LoadOrStore(uid, sess)
-	usersStream.LoadOrStore(uid, stream)
-	usersBroadcastStream.LoadOrStore(uid, broadcastStream)
+	// broadcastStream, err := sess.OpenUniStream()
+	// if err != nil {
+	// 	mlog.Println(err)
+	// 	return err
+	// }
+	// var uid = request.GetUid()
+	// mlog.Println("broadcastWriteStream ID", broadcastStream.StreamID())
+	// usersSession.LoadOrStore(uid, sess)
+	// usersStream.LoadOrStore(uid, stream)
+	// usersBroadcastStream.LoadOrStore(uid, broadcastStream)
 	buff, err := connectAckBytes(result)
 	if err != nil {
 		mlog.Println(err)
 		return err
 	}
-	_, err = stream.Write(buff)
+	_, err = y.quicStream.Write(buff)
 	if err != nil {
 		mlog.Println(err)
 		return err

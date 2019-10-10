@@ -3,16 +3,14 @@ package gateway
 import (
 	"yt/ytproto/msg"
 
-	tp "github.com/henrylee2cn/teleport"
-
 	"github.com/lucas-clemente/quic-go"
 )
 
-func (y *ytClientInfo) subscribeTopic(rpcsess tp.Session, requestMsg *msg.Msg) {
+func (y *ytClientInfo) subscribeTopic(requestMsg *msg.Msg) {
 	mlog.Println("gateway subscribe topic")
 
 	var result int32
-	rerr := rpcsess.Call("/manager/subscribetopic", requestMsg, &result).Rerror()
+	rerr := y.tpSession.Call("/manager/subscribetopic", requestMsg, &result).Rerror()
 	if rerr.ToError() != nil {
 		mlog.Println(rerr.String())
 		return
@@ -20,17 +18,17 @@ func (y *ytClientInfo) subscribeTopic(rpcsess tp.Session, requestMsg *msg.Msg) {
 	request := requestMsg.Command.GetSubscribe()
 	uid := request.GetUid()
 	tid := request.GetTid()
-	result = preStorageTopicBroadcastStream(uid, tid, result)
-	streamer, ok := usersStream.Load(uid)
-	if !ok {
-		mlog.Println("streamer is not exist")
-		return
-	}
-	stream, ok := streamer.(quic.Stream)
-	if !ok {
-		mlog.Println("get stream err")
-		return
-	}
+	result = y.preStorageTopicBroadcastStream(uid, tid, result)
+	// streamer, ok := usersStream.Load(uid)
+	// if !ok {
+	// 	mlog.Println("streamer is not exist")
+	// 	return
+	// }
+	// stream, ok := streamer.(quic.Stream)
+	// if !ok {
+	// 	mlog.Println("get stream err")
+	// 	return
+	// }
 	buff, err := subscriberTopicBytes(result)
 	if err != nil {
 		mlog.Println(err)
@@ -38,7 +36,7 @@ func (y *ytClientInfo) subscribeTopic(rpcsess tp.Session, requestMsg *msg.Msg) {
 	}
 	y.currentTopic = tid
 	y.topicPushServerAddr = pushAddr
-	_, err = stream.Write(buff)
+	_, err = y.quicStream.Write(buff)
 	if err != nil {
 		mlog.Println(err)
 		return
@@ -59,22 +57,15 @@ func subscriberTopicBytes(r int32) ([]byte, error) {
 }
 
 // 预存topic广播流地址
-func preStorageTopicBroadcastStream(uid, tid uint32, r int32) int32 {
-	sendStreamer, isExist := usersBroadcastStream.Load(uid)
-	if !isExist {
-		return 100
-	}
-	sendStream, ok := sendStreamer.(quic.SendStream)
-	if !ok {
-		return 101
-	}
+func (y *ytClientInfo) preStorageTopicBroadcastStream(uid, tid uint32, r int32) int32 {
+
 	topicer, isExist := localTopicBroadcast.Load(tid)
 	mlog.Println(tid, isExist, "|||||||||||||")
 	if !isExist {
 		newTopic := &usersOfTopic{
-			users: make(map[uint32]quic.SendStream, 50),
+			users: make(map[uint32]quic.Stream, 10),
 		}
-		newTopic.users[uid] = sendStream
+		newTopic.users[uid] = y.quicStream
 		localTopicBroadcast.Store(tid, newTopic)
 		mlog.Println(tid, isExist, "|||||||||---------||||", newTopic)
 		return 12
@@ -84,7 +75,7 @@ func preStorageTopicBroadcastStream(uid, tid uint32, r int32) int32 {
 		return 103
 	}
 	topic.Lock()
-	topic.users[uid] = sendStream
+	topic.users[uid] = y.quicStream
 	topic.Unlock()
 	localTopicBroadcast.Store(tid, topic)
 	return r

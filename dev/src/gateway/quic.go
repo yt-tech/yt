@@ -40,13 +40,16 @@ func quicServer() {
 	}
 	broadcastRegister(rpcsess)
 	for {
-		clientSession, err := listener.Accept(context.Background())
+		newClientSession, err := listener.Accept(context.Background())
 		if err != nil {
 			mlog.Println(err)
-			clientSession.Close()
+			newClientSession.Close()
 			break
 		}
-		go process(clientSession, rpcsess)
+		var ytCli = new(ytClientInfo)
+		ytCli.quicSession = newClientSession
+		ytCli.tpSession = rpcsess
+		go ytCli.process()
 	}
 }
 

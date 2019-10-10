@@ -1,7 +1,6 @@
 package client
 
 import (
-	"context"
 	"crypto/tls"
 	"time"
 	"yt/ytproto/msg"
@@ -24,6 +23,13 @@ func openQuic() {
 		mlog.Println(err)
 	}
 	mlog.Printf("streamID=%d\n", stream.StreamID())
+	go func() {
+		inBuffer := make([]byte, 1024)
+		for {
+			nn, _ := stream.Read(inBuffer)
+			mlog.Println(inBuffer[:nn])
+		}
+	}()
 	data, err := packConnectData()
 	if err != nil {
 		mlog.Println(err)
@@ -34,7 +40,7 @@ func openQuic() {
 	mlog.Println(err)
 	stream.Write(data)
 	mbf := make([]byte, 1024)
-	stream.Read(mbf)
+	// stream.Read(mbf)
 	ggproto.Unmarshal(mbf, &rl)
 	mlog.Println(rl)
 	var r2 msg.Msg
@@ -48,7 +54,7 @@ func openQuic() {
 	}
 	stream.Write(data)
 	time.Sleep(2000e6)
-	_, err = stream.Read(mbf2)
+	// _, err = stream.Read(mbf2)
 	ggproto.Unmarshal(mbf2, &r2)
 	mlog.Println(r2, err)
 	// 	}
@@ -68,37 +74,37 @@ func openQuic() {
 
 	// }
 
-	var broadcastReadStream quic.ReceiveStream
-	mlog.Println("========================")
-	broadcastReadStream, err = session.AcceptUniStream(context.Background())
-	mlog.Println("========================")
-	if err != nil {
-		mlog.Println(err)
-	}
-	mlog.Println("open read stream", broadcastReadStream.StreamID())
-	mlog.Println("========================")
-	mlog.Println("open read stream")
-	inBuffer := make([]byte, 1024)
-	go func() {
-		for {
-			n, err := broadcastReadStream.Read(inBuffer)
-			if err != nil {
-				mlog.Println(err)
-			}
-			mlog.Println("streamID", stream.StreamID())
-			var rl msg.Msg
-			if err := ggproto.Unmarshal(inBuffer[:n], &rl); err != nil {
-				mlog.Println(rl, err)
-				break
-			}
-			// inDataChannel <- inBuffer
-			switch rl.GetMid() {
-			// case msg.MsgID_SubscribeTopicRequestID:
-			// 	mlog.Println(rl)
-			default:
-				mlog.Println("unkown----------", broadcastReadStream.StreamID(), "------", rl)
-			}
-		}
-	}()
+	// var broadcastReadStream quic.ReceiveStream
+	// mlog.Println("========================")
+	// broadcastReadStream, err = session.AcceptUniStream(context.Background())
+	// mlog.Println("========================")
+	// if err != nil {
+	// 	mlog.Println(err)
+	// }
+	// mlog.Println("open read stream", broadcastReadStream.StreamID())
+	// mlog.Println("========================")
+	// mlog.Println("open read stream")
+
+	// go func() {
+	// 	for {
+	// 		n, err := broadcastReadStream.Read(inBuffer)
+	// 		if err != nil {
+	// 			mlog.Println(err)
+	// 		}
+	// 		mlog.Println("streamID", stream.StreamID())
+	// 		var rl msg.Msg
+	// 		if err := ggproto.Unmarshal(inBuffer[:n], &rl); err != nil {
+	// 			mlog.Println(rl, err)
+	// 			break
+	// 		}
+	// 		// inDataChannel <- inBuffer
+	// 		switch rl.GetMid() {
+	// 		// case msg.MsgID_SubscribeTopicRequestID:
+	// 		// 	mlog.Println(rl)
+	// 		default:
+	// 			mlog.Println("unkown----------", broadcastReadStream.StreamID(), "------", rl)
+	// 		}
+	// 	}
+	// }()
 
 }

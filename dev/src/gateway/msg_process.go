@@ -14,6 +14,9 @@ import (
 type ytClientInfo struct {
 	currentTopic        uint32
 	topicPushServerAddr *net.UDPAddr
+	quicSession         quic.Session
+	quicStream          quic.Stream
+	tpSession           tp.Session
 }
 
 var msgPool = sync.Pool{
@@ -21,31 +24,31 @@ var msgPool = sync.Pool{
 		return &msg.Msg{
 			Mid: 0,
 			Command: &msg.Command{
-				Connect:      new(msg.ConnectInfo),
-				Subscribe:    new(msg.SubscribeTopicInfo),
-				ConnectAck:   new(msg.ConnectAckInfo),
-				SubscribeAck: new(msg.SubscribeTopicAckInfo),
+				Connect:      &msg.ConnectInfo{},
+				Subscribe:    &msg.SubscribeTopicInfo{},
+				ConnectAck:   &msg.ConnectAckInfo{},
+				SubscribeAck: &msg.SubscribeTopicAckInfo{},
 			},
 			AudioData: &msg.AudioData{},
 		}
 	},
 }
 
-func process(quicsess quic.Session, rpcsess tp.Session) {
-	if rpcsess == nil || quicsess == nil {
+func (y *ytClientInfo) process() {
+	if y.tpSession == nil || y.quicSession == nil {
 		mlog.Fatalln("rpcsess or sess is nil ")
 	}
-	var ytCli = new(ytClientInfo)
+	var err error
 	for {
-		stream, err := quicsess.AcceptStream(context.Background())
+		y.quicStream, err = y.quicSession.AcceptStream(context.Background())
 		if err != nil {
 			panic(err)
 		}
-		mlog.Printf("streamID=%d\n", stream.StreamID())
+		mlog.Printf("streamID=%d\n", y.quicStream.StreamID())
 		readBuff := make([]byte, 1024)
 		var buff []byte
 		for {
-			n, err := stream.Read(readBuff)
+			n, err := y.quicStream.Read(readBuff)
 			if err != nil {
 				mlog.Println(err)
 				break
@@ -62,30 +65,30 @@ func process(quicsess quic.Session, rpcsess tp.Session) {
 			}
 			switch message.GetMid() {
 			case msg.MsgID_ConnectID:
-				if err = gt.connectRequest(rpcsess, quicsess, stream, message.Command.GetConnect()); err != nil {
+				if err = y.connectRequest(message.Command.GetConnect()); err != nil {
 					mlog.Println("sess close")
-					quicsess.Close()
+					y.quicSession.Close()
 				}
 			case msg.MsgID_SubscribeTopicID:
-				ytCli.subscribeTopic(rpcsess, message)
+				y.subscribeTopic(message)
 			case msg.MsgID_UnsubscribeTopicID:
 			case msg.MsgID_HoldMicID:
-				if buff, err = gt.holdMic(rpcsess, message); err != nil {
-					msgPool.Put(message)
-					break
-				}
+				// if buff, err = gt.holdMic(rpcsess, message); err != nil {
+				// 	msgPool.Put(message)
+				// 	break
+				// }
 			case msg.MsgID_ReleaseMicID:
 			case msg.MsgID_DisconnectID:
 			case msg.MsgID_AudioDataID:
 				mlog.Println("----audio----")
-				ytCli.audio(message)
+				y.audio(message)
 			default:
 				mlog.Println("--------")
 				msgPool.Put(message)
 				break
 			}
 			msgPool.Put(message)
-			stream.Write(buff)
+			y.quicStream.Write(buff)
 		}
 	}
 }

@@ -15,7 +15,7 @@ type Broadcast struct {
 }
 type usersOfTopic struct {
 	sync.RWMutex
-	users  map[uint32]quic.SendStream
+	users  map[uint32]quic.Stream
 	holder uint32
 }
 
