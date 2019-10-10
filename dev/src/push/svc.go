@@ -2,7 +2,6 @@ package push
 
 import (
 	"net"
-	"net/http"
 
 	"github.com/smallnest/rpcx/server"
 )
@@ -22,10 +21,18 @@ var s *server.Server
 
 //StartPush ..
 func StartPush() {
-	ln, _ := net.Listen("tcp", ":9981")
-	go http.Serve(ln, nil)
-	s = server.NewServer()
-	s.Register(new(PushServer), "")
-	go s.Serve("tcp", addr)
-	select {}
+	addr, err := net.ResolveUDPAddr("udp", ":9999")
+	if err != nil {
+		mlog.Println(err)
+	}
+	conn, err := net.ListenUDP("udp", addr)
+	if err != nil {
+		mlog.Println(err)
+	}
+	buff := make([]byte, 1024)
+	for {
+		n, raddr, _ := conn.ReadFromUDP(buff)
+		mlog.Println(buff[:n])
+		conn.WriteToUDP(buff[:n], raddr)
+	}
 }

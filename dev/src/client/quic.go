@@ -39,18 +39,29 @@ func openQuic() {
 	mlog.Println(rl)
 	var r2 msg.Msg
 	mbf2 := make([]byte, 1024)
+	// go func() {
+	// 	for {
+	data, err = packSubscribeTopic()
+	if err != nil {
+		mlog.Println(err)
+		return
+	}
+	stream.Write(data)
+	time.Sleep(2000e6)
+	_, err = stream.Read(mbf2)
+	ggproto.Unmarshal(mbf2, &r2)
+	mlog.Println(r2, err)
+	// 	}
+	// }()
 	go func() {
 		for {
-			data, err = packSubscribeTopic()
+			data, err = packAudioData()
 			if err != nil {
 				mlog.Println(err)
 				return
 			}
 			stream.Write(data)
-			time.Sleep(2000e6)
-			_, err = stream.Read(mbf2)
-			ggproto.Unmarshal(mbf2, &r2)
-			mlog.Println(r2, err)
+			time.Sleep(12e7)
 		}
 	}()
 	// if rl.Response.ConnectAck.GetResult() == 1 || rl.Response.ConnectAck.GetResult() == 2 {

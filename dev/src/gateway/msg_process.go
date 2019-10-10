@@ -77,7 +77,8 @@ func process(quicsess quic.Session, rpcsess tp.Session) {
 			case msg.MsgID_ReleaseMicID:
 			case msg.MsgID_DisconnectID:
 			case msg.MsgID_AudioDataID:
-				// m := message.GetAudioData()
+				mlog.Println("----audio----")
+				ytCli.audio(message)
 			default:
 				mlog.Println("--------")
 				msgPool.Put(message)

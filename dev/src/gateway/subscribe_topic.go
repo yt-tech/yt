@@ -36,7 +36,8 @@ func (y *ytClientInfo) subscribeTopic(rpcsess tp.Session, requestMsg *msg.Msg) {
 		mlog.Println(err)
 		return
 	}
-	y.tid = tid
+	y.currentTopic = tid
+	y.topicPushServerAddr = pushAddr
 	_, err = stream.Write(buff)
 	if err != nil {
 		mlog.Println(err)
@@ -68,11 +69,14 @@ func preStorageTopicBroadcastStream(uid, tid uint32, r int32) int32 {
 		return 101
 	}
 	topicer, isExist := localTopicBroadcast.Load(tid)
+	mlog.Println(tid, isExist, "|||||||||||||")
 	if !isExist {
 		newTopic := &usersOfTopic{
 			users: make(map[uint32]quic.SendStream, 50),
 		}
+		newTopic.users[uid] = sendStream
 		localTopicBroadcast.Store(tid, newTopic)
+		mlog.Println(tid, isExist, "|||||||||---------||||", newTopic)
 		return 12
 	}
 	topic, ok := topicer.(*usersOfTopic)
@@ -82,5 +86,6 @@ func preStorageTopicBroadcastStream(uid, tid uint32, r int32) int32 {
 	topic.Lock()
 	topic.users[uid] = sendStream
 	topic.Unlock()
+	localTopicBroadcast.Store(tid, topic)
 	return r
 }

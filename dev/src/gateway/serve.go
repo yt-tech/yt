@@ -3,28 +3,37 @@ package gateway
 import (
 	"fmt"
 	"net"
+	"yt/ytproto/msg"
+
+	ggproto "github.com/gogo/protobuf/proto"
 )
 
 var ublconn *net.UDPConn
+var pushAddr *net.UDPAddr
 
-func init() {
-	addr, err := net.ResolveUDPAddr("udp", "192.168.1.113:9999")
-	if err != nil {
-		fmt.Println(err)
-	}
-	ublconn, err := net.ListenUDP("udp", addr)
-	net.DialUDP()
-	if err != nil {
-		fmt.Println(err)
-	}
-}
 func audioListen() {
-
+	addr, err := net.ResolveUDPAddr("udp", "127.0.0.1:9998")
+	if err != nil {
+		fmt.Println(err)
+	}
+	push, err := net.ResolveUDPAddr("udp", "127.0.0.1:9999")
+	if err != nil {
+		fmt.Println(err)
+	}
+	pushAddr = push
+	ublconn, err = net.ListenUDP("udp", addr)
+	if err != nil {
+		fmt.Println(err)
+	}
 	buff := make([]byte, 1024)
 	for {
 		n, _, err := ublconn.ReadFromUDP(buff)
 		if err != nil {
-			fmt.Println(err)
+			mlog.Println(err, n)
 		}
+		mlog.Println(buff[:n], string(buff[:n]))
+		var mm = new(msg.Msg)
+		ggproto.Unmarshal(buff[:n], mm)
+		broadcastAudio(mm)
 	}
 }

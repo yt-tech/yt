@@ -11,7 +11,7 @@ func packSubscribeTopic() ([]byte, error) {
 		Mid: msg.MsgID_SubscribeTopicID,
 		Command: &msg.Command{
 			Subscribe: &msg.SubscribeTopicInfo{
-				Uid: 4,
+				Uid: 2,
 				Tid: 1,
 			},
 		},

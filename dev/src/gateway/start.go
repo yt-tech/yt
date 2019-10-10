@@ -5,7 +5,7 @@ import "time"
 //StartGateway ..
 func StartGateway() {
 	// go gatewayRegister()
-	go broadcastListen()
+	go audioListen()
 	time.Sleep(1e8)
 	quicServer()
 }

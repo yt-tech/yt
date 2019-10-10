@@ -8,7 +8,7 @@ import (
 
 func packConnectData() ([]byte, error) {
 	conectRequest := &msg.ConnectInfo{
-		Uid: 4,
+		Uid: 2,
 	}
 	request := &msg.Command{
 		Connect: conectRequest,
