@@ -18,7 +18,7 @@ func Start() {
 	openQuic()
 	// time.Sleep(1e9)
 	// logger.Debug("sdfsdfsdf testset")
-	time.Sleep(120e9)
+	time.Sleep(1200e9)
 	// userHoldMic()
 	// select {}
 }

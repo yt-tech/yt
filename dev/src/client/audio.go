@@ -10,10 +10,10 @@ func packAudioData() ([]byte, error) {
 	cm := &msg.Msg{
 		Mid: msg.MsgID_AudioDataID,
 		AudioData: &msg.AudioData{
-			Id:   124,
-			Uid:  2,
+			Id:   24,
+			Uid:  1,
 			Tid:  1,
-			Data: []byte("audio"),
+			Data: []byte("---11111---"),
 		},
 	}
 	return ggproto.Marshal(cm)

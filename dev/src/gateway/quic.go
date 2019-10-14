@@ -15,7 +15,7 @@ import (
 	quic "github.com/lucas-clemente/quic-go"
 )
 
-var mlog = log.New(os.Stdout, "gateway ", log.LstdFlags|log.Lshortfile)
+var mlog = log.New(os.Stdout, "gateway ", log.Lmicroseconds|log.Lshortfile)
 var gt = &gateway{}
 
 //QuicServer Start a server that echos all data on the first stream opened by the client

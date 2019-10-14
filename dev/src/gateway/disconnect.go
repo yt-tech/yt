@@ -7,10 +7,10 @@ import (
 	"github.com/lucas-clemente/quic-go"
 )
 
-func (g *gateway) disconnectRequest(rpcsess tp.Session, sess quic.Session, stream quic.Stream, request *msg.ConnectInfo) error {
+func (g *gateway) disconnectRequest(rpcsess tp.Session, sess quic.Session, stream quic.Stream, message *msg.Msg) error {
 	mlog.Println("disconnectRequest----------------------->>>>>")
 	var result int32
-	rerr := rpcsess.Call("/manager/disconnect", request, &result, tp.WithAddMeta("author", "henrylee2cn")).Rerror()
+	rerr := rpcsess.Call("/manager/disconnect", message, &result, tp.WithAddMeta("author", "henrylee2cn")).Rerror()
 	if rerr.ToError() != nil {
 		mlog.Println(rerr)
 		return rerr.ToError()
@@ -20,12 +20,8 @@ func (g *gateway) disconnectRequest(rpcsess tp.Session, sess quic.Session, strea
 		mlog.Println(err)
 		return err
 	}
-	var uid = request.GetUid()
 	mlog.Println("broadcastWriteStream ID", broadcastStream.StreamID())
-	usersSession.LoadOrStore(uid, sess)
-	usersStream.LoadOrStore(uid, stream)
-	usersBroadcastStream.LoadOrStore(uid, broadcastStream)
-	buff, err := connectAckBytes(result)
+	buff, err := send2cliPack(message, msg.MsgID_DisConnectAckID, result)
 	if err != nil {
 		mlog.Println(err)
 		return err
@@ -38,14 +34,18 @@ func (g *gateway) disconnectRequest(rpcsess tp.Session, sess quic.Session, strea
 	return nil
 }
 
-func disconnectAckBytes(r int32) ([]byte, error) {
-	ack := msgPool.Get().(*msg.Msg)
-	ack.Mid = msg.MsgID_ConnectID
-	ack.Command.ConnectAck.Result = r
-	bf, err := ack.Marshal()
-	msgPool.Put(ack)
-	if err != nil {
-		return nil, err
+func (y *ytClientInfo) closenet() {
+	u, isExist := clientsMap.Load(y.quicSession.RemoteAddr().String())
+	if u != nil {
+		uu := u.(uint32)
+		mlog.Printf("user=%d(%s) not recent network activity", uu, y.quicSession.RemoteAddr().String())
+		if isExist {
+			t, _ := localTopicBroadcast.Load(y.currentTopic)
+			tt := t.(*usersOfTopic)
+			tt.Lock()
+			delete(tt.users, uu)
+			tt.Unlock()
+		}
 	}
-	return bf, nil
+	clientsMap.Delete(y.quicSession.RemoteAddr().String())
 }

@@ -42,7 +42,6 @@ func openQuic() {
 	mbf := make([]byte, 1024)
 	// stream.Read(mbf)
 	ggproto.Unmarshal(mbf, &rl)
-	mlog.Println(rl)
 	var r2 msg.Msg
 	mbf2 := make([]byte, 1024)
 	// go func() {

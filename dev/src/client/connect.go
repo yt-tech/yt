@@ -7,15 +7,16 @@ import (
 )
 
 func packConnectData() ([]byte, error) {
-	conectRequest := &msg.ConnectInfo{
-		Uid: 2,
-	}
-	request := &msg.Command{
-		Connect: conectRequest,
-	}
 	cm := &msg.Msg{
-		Mid:     1,
-		Command: request,
+		Mid: msg.MsgID_ConnectID,
+		Command: &msg.Command{
+			Connect: &msg.ConnectInfo{
+				Uid: 1,
+			},
+			ConnectAck: &msg.ConnectAckInfo{
+				Result: 0,
+			},
+		},
 	}
 	return ggproto.Marshal(cm)
 }

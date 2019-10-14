@@ -42,41 +42,50 @@ func (y *ytClientInfo) process() {
 	for {
 		y.quicStream, err = y.quicSession.AcceptStream(context.Background())
 		if err != nil {
-			panic(err)
+			y.closenet()
+			mlog.Println(err)
+			return
 		}
-		mlog.Printf("streamID=%d\n", y.quicStream.StreamID())
+
+		mlog.Printf("start streamID=%d\n", y.quicStream.StreamID())
 		readBuff := make([]byte, 1024)
 		var buff []byte
+		var message = &msg.Msg{}
 		for {
 			n, err := y.quicStream.Read(readBuff)
 			if err != nil {
-				mlog.Println(err)
-				break
+				y.closenet()
+				mlog.Println(err, y.quicSession.RemoteAddr().String(), y.quicSession.LocalAddr())
+				return
 			}
-			message, ok := msgPool.Get().(*msg.Msg)
-			if !ok {
-				break
-			}
+			mlog.Println(readBuff[:n])
 			err = ggproto.Unmarshal(readBuff[:n], message)
 			if err != nil {
 				mlog.Println(err)
-				msgPool.Put(message)
 				break
 			}
+			mlog.Println(message)
+
 			switch message.GetMid() {
 			case msg.MsgID_ConnectID:
-				if err = y.connectRequest(message.Command.GetConnect()); err != nil {
+				buff, err = y.connectRequest(message)
+				if err != nil {
 					mlog.Println("sess close")
 					y.quicSession.Close()
+					break
 				}
+				// clientsMap.LoadOrStore(y.quicSession.RemoteAddr().String(), uid)
 			case msg.MsgID_SubscribeTopicID:
-				y.subscribeTopic(message)
+				buff, err = y.subscribeTopic(message)
+				if err != nil {
+					break
+				}
 			case msg.MsgID_UnsubscribeTopicID:
 			case msg.MsgID_HoldMicID:
-				// if buff, err = gt.holdMic(rpcsess, message); err != nil {
-				// 	msgPool.Put(message)
-				// 	break
-				// }
+				if buff, err = y.holdMic(message); err != nil {
+					msgPool.Put(message)
+					break
+				}
 			case msg.MsgID_ReleaseMicID:
 			case msg.MsgID_DisconnectID:
 			case msg.MsgID_AudioDataID:
@@ -84,7 +93,6 @@ func (y *ytClientInfo) process() {
 				y.audio(message)
 			default:
 				mlog.Println("--------")
-				msgPool.Put(message)
 				break
 			}
 			msgPool.Put(message)

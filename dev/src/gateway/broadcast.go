@@ -19,7 +19,6 @@ type usersOfTopic struct {
 	holder uint32
 }
 
-var localTopicBroadcast sync.Map //tid-*usersOfTopic
 
 //Push ..
 func (b *Broadcast) Push(bmsg *msg.Msg) *tp.Rerror {
