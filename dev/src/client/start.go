@@ -16,11 +16,18 @@ var outDataChannel = make(chan []byte, 100)
 
 //Start ..
 func Start() {
+	cli := newClient()
 	// gatewayAddr = getDisp()
 	mlog.Println(gatewayAddr)
 	openQuic()
 	// time.Sleep(1e9)
-	// logger.Debug("sdfsdfsdf testset")
+	logger.Debug("sdfsdfsdf testset")
+	go func() {
+		//  receiver ,err :=
+		for {
+
+		}
+	}()
 	for {
 		f := bufio.NewReader(os.Stdin) //读取输入的内容
 		fmt.Print("请输入命令->")

@@ -10,7 +10,13 @@ import (
 
 var quicStream quic.Stream
 
-func openQuic() {
+type clientInfo struct {
+	uid     uint32
+	tid     uint32
+	session quic.Session
+}
+
+func (c *clientInfo) openQuic() {
 	tlsConf := &tls.Config{
 		InsecureSkipVerify: true,
 		NextProtos:         []string{"quic-echo-example"},
