@@ -9,15 +9,8 @@ import (
 func packSubscribeTopic() ([]byte, error) {
 	cm := &msg.Msg{
 		Mid: msg.MsgID_SubscribeTopicID,
-		Command: &msg.Command{
-			Subscribe: &msg.SubscribeTopicInfo{
-				Uid: 1,
-				Tid: 1,
-			},
-			SubscribeAck: &msg.SubscribeTopicAckInfo{
-				Result: 0,
-			},
-		},
+		Uid: 222,
+		Tid: 1,
 	}
 
 	return ggproto.Marshal(cm)

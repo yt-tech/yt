@@ -17,71 +17,78 @@ enum MsgID {
     DisconnectID            =11;
     DisConnectAckID         =12;
     AudioDataID             =13;
+    PingID                  =14;
+    PongID                  =15;
 }
 
 message Msg {
-    MsgID       mid          = 1;
-    Command     command      = 2;
-    AudioData   audioData    = 3;
+    sint32      version      = 1;
+    MsgID       mid          = 2;
+    uint32      uid          = 3;
+    uint32      tid          = 4;
+    Command     command      = 5;
+    AudioData   audioData    = 6;
+    sint32      ackCode      = 7;
 }
 message Command {
-    ConnectInfo             connect        = 1;
-    ConnectAckInfo          connectAck     = 2;
-    SubscribeTopicInfo      subscribe      = 3;
-    SubscribeTopicAckInfo   subscribeAck   = 4;
-    UnsubscribeTopicAckInfo unsbuscribe    = 5; 
-    UnsubscribeTopicAckInfo unsbuscribeAck = 6;
-    HoldMicInfo             holdMic        = 7;
-    HoldMicAckInfo          holdMicAck     = 8;
-    ReleaseMicInfo          releaseMic     = 9;
-    ReleaseMicAckInfo       releaseMicAck  =10;
-    DisconnectInfo          disconnect     =11;
-    DisConnectAckInfo       disconnectAck  =12;
+    // ConnectInfo             connect        = 1;
+    // ConnectAckInfo          connectAck     = 2;
+    // SubscribeTopicInfo      subscribe      = 3;
+    // SubscribeTopicAckInfo   subscribeAck   = 4;
+    // UnsubscribeTopicAckInfo unsbuscribe    = 5; 
+    // UnsubscribeTopicAckInfo unsbuscribeAck = 6;
+    // HoldMicInfo             holdMic        = 7;
+    // HoldMicAckInfo          holdMicAck     = 8;
+    // ReleaseMicInfo          releaseMic     = 9;
+    // ReleaseMicAckInfo       releaseMicAck  =10;
+    // DisconnectInfo          disconnect     =11;
+    // DisConnectAckInfo       disconnectAck  =12;
+    // sint32                  ackCode        =13;
 }
 message AudioData {
-    sint32 id       = 1;
-    uint32 uid      = 2;
-    uint32 tid      = 3;
-    bytes  data     = 4;
+    sint32 id              = 1;
+    sint32 tpye            = 2;
+    uint64 timestamp       = 5;
+    bytes  data            = 6;
 }
 
-message ConnectInfo {
-    uint32 uid            = 1;
-}
-message ConnectAckInfo {
-    sint32 result         = 1;
-}
-message SubscribeTopicInfo {
-    uint32 uid            = 1;
-    uint32 tid            = 2;
-}
-message SubscribeTopicAckInfo{
-    sint32 result         = 1;
-}
-message UnsubscribeTopicInfo {
-    uint32 uid            = 1;
-    uint32 tid            = 2;
-}
-message UnsubscribeTopicAckInfo{
-    sint32 result         = 1;
-}
-message HoldMicInfo {
-    uint32 uid            = 1;
-    uint32 tid            = 2;
-}
-message HoldMicAckInfo {
-    sint32 result         = 1;
-}
-message ReleaseMicInfo {
-    uint32 uid            = 1;
-    uint32 tid            = 2;
-}
-message ReleaseMicAckInfo {
-    sint32 result         = 1;
-}
-message DisconnectInfo {
-    uint32 uid            = 1;
-}
-message DisConnectAckInfo {
-    sint32 result         = 1;
-}
+// message ConnectInfo {
+//     uint32 uid            = 1;
+// }
+// message ConnectAckInfo {
+//     sint32 result         = 1;
+// }
+// message SubscribeTopicInfo {
+//     uint32 uid            = 1;
+//     uint32 tid            = 2;
+// }
+// message SubscribeTopicAckInfo{
+//     sint32 result         = 1;
+// }
+// message UnsubscribeTopicInfo {
+//     uint32 uid            = 1;
+//     uint32 tid            = 2;
+// }
+// message UnsubscribeTopicAckInfo{
+//     sint32 result         = 1;
+// }
+// message HoldMicInfo {
+//     uint32 uid            = 1;
+//     uint32 tid            = 2;
+// }
+// message HoldMicAckInfo {
+//     sint32 result         = 1;
+// }
+// message ReleaseMicInfo {
+//     uint32 uid            = 1;
+//     uint32 tid            = 2;
+// }
+// message ReleaseMicAckInfo {
+//     sint32 result         = 1;
+// }
+// message DisconnectInfo {
+//     uint32 uid            = 1;
+// }
+// message DisConnectAckInfo {
+//     sint32 result         = 1;
+// }

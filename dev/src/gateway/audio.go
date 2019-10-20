@@ -4,7 +4,7 @@ import (
 	"yt/ytproto/msg"
 )
 
-func (y *ytClientInfo) audio(data *msg.Msg) {
+func (y *ytClientInfo) audioReceive(data *msg.Msg) {
 	buff, err := data.Marshal()
 	if err != nil {
 		mlog.Println(err)
@@ -16,7 +16,7 @@ func (y *ytClientInfo) audio(data *msg.Msg) {
 }
 
 func broadcastAudio(m *msg.Msg) {
-	tid := m.AudioData.GetTid()
+	tid := m.GetTid()
 	tstreamer, isExist := localTopicBroadcast.Load(tid)
 	if !isExist {
 		mlog.Println(tid, "is not exist")

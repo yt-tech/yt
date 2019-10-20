@@ -9,10 +9,9 @@ import (
 func (g *gateway) releaseMic(rpcsess tp.Session, message *msg.Msg) ([]byte, error) {
 	mlog.Println("hold mic")
 	var result int32
-	request := message.Command.GetHoldMic()
-	uid := request.GetUid()
-	tid := request.GetTid()
-	result = newHoldMic(uid, tid, result)
+	uid := message.GetUid()
+	tid := message.GetTid()
+	newHoldMic(uid, tid, &result)
 	if result > 99 {
 		return send2cliPack(message, msg.MsgID_ReleaseMicAckID, result)
 	}

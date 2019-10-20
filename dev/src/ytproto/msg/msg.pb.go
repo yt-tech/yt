@@ -39,6 +39,8 @@ const (
 	MsgID_DisconnectID          MsgID = 11
 	MsgID_DisConnectAckID       MsgID = 12
 	MsgID_AudioDataID           MsgID = 13
+	MsgID_PingID                MsgID = 14
+	MsgID_PongID                MsgID = 15
 )
 
 var MsgID_name = map[int32]string{
@@ -56,6 +58,8 @@ var MsgID_name = map[int32]string{
 	11: "DisconnectID",
 	12: "DisConnectAckID",
 	13: "AudioDataID",
+	14: "PingID",
+	15: "PongID",
 }
 
 var MsgID_value = map[string]int32{
@@ -73,6 +77,8 @@ var MsgID_value = map[string]int32{
 	"DisconnectID":          11,
 	"DisConnectAckID":       12,
 	"AudioDataID":           13,
+	"PingID":                14,
+	"PongID":                15,
 }
 
 func (x MsgID) String() string {
@@ -84,9 +90,13 @@ func (MsgID) EnumDescriptor() ([]byte, []int) {
 }
 
 type Msg struct {
-	Mid                  MsgID      `protobuf:"varint,1,opt,name=mid,proto3,enum=msg.MsgID" json:"mid,omitempty"`
-	Command              *Command   `protobuf:"bytes,2,opt,name=command,proto3" json:"command,omitempty"`
-	AudioData            *AudioData `protobuf:"bytes,4,opt,name=audioData,proto3" json:"audioData,omitempty"`
+	Version              int32      `protobuf:"zigzag32,1,opt,name=version,proto3" json:"version,omitempty"`
+	Mid                  MsgID      `protobuf:"varint,2,opt,name=mid,proto3,enum=msg.MsgID" json:"mid,omitempty"`
+	Uid                  uint32     `protobuf:"varint,3,opt,name=uid,proto3" json:"uid,omitempty"`
+	Tid                  uint32     `protobuf:"varint,4,opt,name=tid,proto3" json:"tid,omitempty"`
+	Command              *Command   `protobuf:"bytes,5,opt,name=command,proto3" json:"command,omitempty"`
+	AudioData            *AudioData `protobuf:"bytes,6,opt,name=audioData,proto3" json:"audioData,omitempty"`
+	AckCode              int32      `protobuf:"zigzag32,7,opt,name=ackCode,proto3" json:"ackCode,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
 	XXX_unrecognized     []byte     `json:"-"`
 	XXX_sizecache        int32      `json:"-"`
@@ -125,11 +135,32 @@ func (m *Msg) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Msg proto.InternalMessageInfo
 
+func (m *Msg) GetVersion() int32 {
+	if m != nil {
+		return m.Version
+	}
+	return 0
+}
+
 func (m *Msg) GetMid() MsgID {
 	if m != nil {
 		return m.Mid
 	}
 	return MsgID_UNKNOWN
+}
+
+func (m *Msg) GetUid() uint32 {
+	if m != nil {
+		return m.Uid
+	}
+	return 0
+}
+
+func (m *Msg) GetTid() uint32 {
+	if m != nil {
+		return m.Tid
+	}
+	return 0
 }
 
 func (m *Msg) GetCommand() *Command {
@@ -146,22 +177,17 @@ func (m *Msg) GetAudioData() *AudioData {
 	return nil
 }
 
+func (m *Msg) GetAckCode() int32 {
+	if m != nil {
+		return m.AckCode
+	}
+	return 0
+}
+
 type Command struct {
-	Connect              *ConnectInfo             `protobuf:"bytes,1,opt,name=connect,proto3" json:"connect,omitempty"`
-	ConnectAck           *ConnectAckInfo          `protobuf:"bytes,2,opt,name=connectAck,proto3" json:"connectAck,omitempty"`
-	Subscribe            *SubscribeTopicInfo      `protobuf:"bytes,3,opt,name=subscribe,proto3" json:"subscribe,omitempty"`
-	SubscribeAck         *SubscribeTopicAckInfo   `protobuf:"bytes,4,opt,name=subscribeAck,proto3" json:"subscribeAck,omitempty"`
-	Unsbuscribe          *UnsubscribeTopicAckInfo `protobuf:"bytes,5,opt,name=unsbuscribe,proto3" json:"unsbuscribe,omitempty"`
-	UnsbuscribeAck       *UnsubscribeTopicAckInfo `protobuf:"bytes,6,opt,name=unsbuscribeAck,proto3" json:"unsbuscribeAck,omitempty"`
-	HoldMic              *HoldMicInfo             `protobuf:"bytes,7,opt,name=holdMic,proto3" json:"holdMic,omitempty"`
-	HoldMicAck           *HoldMicAckInfo          `protobuf:"bytes,8,opt,name=holdMicAck,proto3" json:"holdMicAck,omitempty"`
-	ReleaseMic           *ReleaseMicInfo          `protobuf:"bytes,9,opt,name=releaseMic,proto3" json:"releaseMic,omitempty"`
-	ReleaseMicAck        *ReleaseMicAckInfo       `protobuf:"bytes,10,opt,name=releaseMicAck,proto3" json:"releaseMicAck,omitempty"`
-	Disconnect           *DisconnectInfo          `protobuf:"bytes,11,opt,name=disconnect,proto3" json:"disconnect,omitempty"`
-	DisconnectAck        *DisConnectAckInfo       `protobuf:"bytes,12,opt,name=disconnectAck,proto3" json:"disconnectAck,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
-	XXX_unrecognized     []byte                   `json:"-"`
-	XXX_sizecache        int32                    `json:"-"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *Command) Reset()         { *m = Command{} }
@@ -197,95 +223,11 @@ func (m *Command) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Command proto.InternalMessageInfo
 
-func (m *Command) GetConnect() *ConnectInfo {
-	if m != nil {
-		return m.Connect
-	}
-	return nil
-}
-
-func (m *Command) GetConnectAck() *ConnectAckInfo {
-	if m != nil {
-		return m.ConnectAck
-	}
-	return nil
-}
-
-func (m *Command) GetSubscribe() *SubscribeTopicInfo {
-	if m != nil {
-		return m.Subscribe
-	}
-	return nil
-}
-
-func (m *Command) GetSubscribeAck() *SubscribeTopicAckInfo {
-	if m != nil {
-		return m.SubscribeAck
-	}
-	return nil
-}
-
-func (m *Command) GetUnsbuscribe() *UnsubscribeTopicAckInfo {
-	if m != nil {
-		return m.Unsbuscribe
-	}
-	return nil
-}
-
-func (m *Command) GetUnsbuscribeAck() *UnsubscribeTopicAckInfo {
-	if m != nil {
-		return m.UnsbuscribeAck
-	}
-	return nil
-}
-
-func (m *Command) GetHoldMic() *HoldMicInfo {
-	if m != nil {
-		return m.HoldMic
-	}
-	return nil
-}
-
-func (m *Command) GetHoldMicAck() *HoldMicAckInfo {
-	if m != nil {
-		return m.HoldMicAck
-	}
-	return nil
-}
-
-func (m *Command) GetReleaseMic() *ReleaseMicInfo {
-	if m != nil {
-		return m.ReleaseMic
-	}
-	return nil
-}
-
-func (m *Command) GetReleaseMicAck() *ReleaseMicAckInfo {
-	if m != nil {
-		return m.ReleaseMicAck
-	}
-	return nil
-}
-
-func (m *Command) GetDisconnect() *DisconnectInfo {
-	if m != nil {
-		return m.Disconnect
-	}
-	return nil
-}
-
-func (m *Command) GetDisconnectAck() *DisConnectAckInfo {
-	if m != nil {
-		return m.DisconnectAck
-	}
-	return nil
-}
-
 type AudioData struct {
 	Id                   int32    `protobuf:"zigzag32,1,opt,name=id,proto3" json:"id,omitempty"`
-	Uid                  uint32   `protobuf:"varint,2,opt,name=uid,proto3" json:"uid,omitempty"`
-	Tid                  uint32   `protobuf:"varint,3,opt,name=tid,proto3" json:"tid,omitempty"`
-	Data                 []byte   `protobuf:"bytes,4,opt,name=data,proto3" json:"data,omitempty"`
+	Tpye                 int32    `protobuf:"zigzag32,2,opt,name=tpye,proto3" json:"tpye,omitempty"`
+	Timestamp            uint64   `protobuf:"varint,5,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Data                 []byte   `protobuf:"bytes,6,opt,name=data,proto3" json:"data,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -331,16 +273,16 @@ func (m *AudioData) GetId() int32 {
 	return 0
 }
 
-func (m *AudioData) GetUid() uint32 {
+func (m *AudioData) GetTpye() int32 {
 	if m != nil {
-		return m.Uid
+		return m.Tpye
 	}
 	return 0
 }
 
-func (m *AudioData) GetTid() uint32 {
+func (m *AudioData) GetTimestamp() uint64 {
 	if m != nil {
-		return m.Tid
+		return m.Timestamp
 	}
 	return 0
 }
@@ -352,667 +294,44 @@ func (m *AudioData) GetData() []byte {
 	return nil
 }
 
-type ConnectInfo struct {
-	Uid                  uint32   `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *ConnectInfo) Reset()         { *m = ConnectInfo{} }
-func (m *ConnectInfo) String() string { return proto.CompactTextString(m) }
-func (*ConnectInfo) ProtoMessage()    {}
-func (*ConnectInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d0f0a1b324c95b77, []int{3}
-}
-func (m *ConnectInfo) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *ConnectInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_ConnectInfo.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *ConnectInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ConnectInfo.Merge(m, src)
-}
-func (m *ConnectInfo) XXX_Size() int {
-	return m.Size()
-}
-func (m *ConnectInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_ConnectInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_ConnectInfo proto.InternalMessageInfo
-
-func (m *ConnectInfo) GetUid() uint32 {
-	if m != nil {
-		return m.Uid
-	}
-	return 0
-}
-
-type ConnectAckInfo struct {
-	Result               int32    `protobuf:"zigzag32,1,opt,name=result,proto3" json:"result,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *ConnectAckInfo) Reset()         { *m = ConnectAckInfo{} }
-func (m *ConnectAckInfo) String() string { return proto.CompactTextString(m) }
-func (*ConnectAckInfo) ProtoMessage()    {}
-func (*ConnectAckInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d0f0a1b324c95b77, []int{4}
-}
-func (m *ConnectAckInfo) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *ConnectAckInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_ConnectAckInfo.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *ConnectAckInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ConnectAckInfo.Merge(m, src)
-}
-func (m *ConnectAckInfo) XXX_Size() int {
-	return m.Size()
-}
-func (m *ConnectAckInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_ConnectAckInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_ConnectAckInfo proto.InternalMessageInfo
-
-func (m *ConnectAckInfo) GetResult() int32 {
-	if m != nil {
-		return m.Result
-	}
-	return 0
-}
-
-type SubscribeTopicInfo struct {
-	Uid                  uint32   `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
-	Tid                  uint32   `protobuf:"varint,2,opt,name=tid,proto3" json:"tid,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *SubscribeTopicInfo) Reset()         { *m = SubscribeTopicInfo{} }
-func (m *SubscribeTopicInfo) String() string { return proto.CompactTextString(m) }
-func (*SubscribeTopicInfo) ProtoMessage()    {}
-func (*SubscribeTopicInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d0f0a1b324c95b77, []int{5}
-}
-func (m *SubscribeTopicInfo) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *SubscribeTopicInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_SubscribeTopicInfo.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *SubscribeTopicInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SubscribeTopicInfo.Merge(m, src)
-}
-func (m *SubscribeTopicInfo) XXX_Size() int {
-	return m.Size()
-}
-func (m *SubscribeTopicInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_SubscribeTopicInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_SubscribeTopicInfo proto.InternalMessageInfo
-
-func (m *SubscribeTopicInfo) GetUid() uint32 {
-	if m != nil {
-		return m.Uid
-	}
-	return 0
-}
-
-func (m *SubscribeTopicInfo) GetTid() uint32 {
-	if m != nil {
-		return m.Tid
-	}
-	return 0
-}
-
-type SubscribeTopicAckInfo struct {
-	Result               int32    `protobuf:"zigzag32,1,opt,name=result,proto3" json:"result,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *SubscribeTopicAckInfo) Reset()         { *m = SubscribeTopicAckInfo{} }
-func (m *SubscribeTopicAckInfo) String() string { return proto.CompactTextString(m) }
-func (*SubscribeTopicAckInfo) ProtoMessage()    {}
-func (*SubscribeTopicAckInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d0f0a1b324c95b77, []int{6}
-}
-func (m *SubscribeTopicAckInfo) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *SubscribeTopicAckInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_SubscribeTopicAckInfo.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *SubscribeTopicAckInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SubscribeTopicAckInfo.Merge(m, src)
-}
-func (m *SubscribeTopicAckInfo) XXX_Size() int {
-	return m.Size()
-}
-func (m *SubscribeTopicAckInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_SubscribeTopicAckInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_SubscribeTopicAckInfo proto.InternalMessageInfo
-
-func (m *SubscribeTopicAckInfo) GetResult() int32 {
-	if m != nil {
-		return m.Result
-	}
-	return 0
-}
-
-type UnsubscribeTopicInfo struct {
-	Uid                  uint32   `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
-	Tid                  uint32   `protobuf:"varint,2,opt,name=tid,proto3" json:"tid,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *UnsubscribeTopicInfo) Reset()         { *m = UnsubscribeTopicInfo{} }
-func (m *UnsubscribeTopicInfo) String() string { return proto.CompactTextString(m) }
-func (*UnsubscribeTopicInfo) ProtoMessage()    {}
-func (*UnsubscribeTopicInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d0f0a1b324c95b77, []int{7}
-}
-func (m *UnsubscribeTopicInfo) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *UnsubscribeTopicInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_UnsubscribeTopicInfo.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *UnsubscribeTopicInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UnsubscribeTopicInfo.Merge(m, src)
-}
-func (m *UnsubscribeTopicInfo) XXX_Size() int {
-	return m.Size()
-}
-func (m *UnsubscribeTopicInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_UnsubscribeTopicInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_UnsubscribeTopicInfo proto.InternalMessageInfo
-
-func (m *UnsubscribeTopicInfo) GetUid() uint32 {
-	if m != nil {
-		return m.Uid
-	}
-	return 0
-}
-
-func (m *UnsubscribeTopicInfo) GetTid() uint32 {
-	if m != nil {
-		return m.Tid
-	}
-	return 0
-}
-
-type UnsubscribeTopicAckInfo struct {
-	Result               int32    `protobuf:"zigzag32,1,opt,name=result,proto3" json:"result,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *UnsubscribeTopicAckInfo) Reset()         { *m = UnsubscribeTopicAckInfo{} }
-func (m *UnsubscribeTopicAckInfo) String() string { return proto.CompactTextString(m) }
-func (*UnsubscribeTopicAckInfo) ProtoMessage()    {}
-func (*UnsubscribeTopicAckInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d0f0a1b324c95b77, []int{8}
-}
-func (m *UnsubscribeTopicAckInfo) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *UnsubscribeTopicAckInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_UnsubscribeTopicAckInfo.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *UnsubscribeTopicAckInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UnsubscribeTopicAckInfo.Merge(m, src)
-}
-func (m *UnsubscribeTopicAckInfo) XXX_Size() int {
-	return m.Size()
-}
-func (m *UnsubscribeTopicAckInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_UnsubscribeTopicAckInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_UnsubscribeTopicAckInfo proto.InternalMessageInfo
-
-func (m *UnsubscribeTopicAckInfo) GetResult() int32 {
-	if m != nil {
-		return m.Result
-	}
-	return 0
-}
-
-type HoldMicInfo struct {
-	Uid                  uint32   `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
-	Tid                  uint32   `protobuf:"varint,2,opt,name=tid,proto3" json:"tid,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *HoldMicInfo) Reset()         { *m = HoldMicInfo{} }
-func (m *HoldMicInfo) String() string { return proto.CompactTextString(m) }
-func (*HoldMicInfo) ProtoMessage()    {}
-func (*HoldMicInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d0f0a1b324c95b77, []int{9}
-}
-func (m *HoldMicInfo) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *HoldMicInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_HoldMicInfo.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *HoldMicInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_HoldMicInfo.Merge(m, src)
-}
-func (m *HoldMicInfo) XXX_Size() int {
-	return m.Size()
-}
-func (m *HoldMicInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_HoldMicInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_HoldMicInfo proto.InternalMessageInfo
-
-func (m *HoldMicInfo) GetUid() uint32 {
-	if m != nil {
-		return m.Uid
-	}
-	return 0
-}
-
-func (m *HoldMicInfo) GetTid() uint32 {
-	if m != nil {
-		return m.Tid
-	}
-	return 0
-}
-
-type HoldMicAckInfo struct {
-	Result               int32    `protobuf:"zigzag32,1,opt,name=result,proto3" json:"result,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *HoldMicAckInfo) Reset()         { *m = HoldMicAckInfo{} }
-func (m *HoldMicAckInfo) String() string { return proto.CompactTextString(m) }
-func (*HoldMicAckInfo) ProtoMessage()    {}
-func (*HoldMicAckInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d0f0a1b324c95b77, []int{10}
-}
-func (m *HoldMicAckInfo) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *HoldMicAckInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_HoldMicAckInfo.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *HoldMicAckInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_HoldMicAckInfo.Merge(m, src)
-}
-func (m *HoldMicAckInfo) XXX_Size() int {
-	return m.Size()
-}
-func (m *HoldMicAckInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_HoldMicAckInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_HoldMicAckInfo proto.InternalMessageInfo
-
-func (m *HoldMicAckInfo) GetResult() int32 {
-	if m != nil {
-		return m.Result
-	}
-	return 0
-}
-
-type ReleaseMicInfo struct {
-	Uid                  uint32   `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
-	Tid                  uint32   `protobuf:"varint,2,opt,name=tid,proto3" json:"tid,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *ReleaseMicInfo) Reset()         { *m = ReleaseMicInfo{} }
-func (m *ReleaseMicInfo) String() string { return proto.CompactTextString(m) }
-func (*ReleaseMicInfo) ProtoMessage()    {}
-func (*ReleaseMicInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d0f0a1b324c95b77, []int{11}
-}
-func (m *ReleaseMicInfo) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *ReleaseMicInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_ReleaseMicInfo.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *ReleaseMicInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ReleaseMicInfo.Merge(m, src)
-}
-func (m *ReleaseMicInfo) XXX_Size() int {
-	return m.Size()
-}
-func (m *ReleaseMicInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_ReleaseMicInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_ReleaseMicInfo proto.InternalMessageInfo
-
-func (m *ReleaseMicInfo) GetUid() uint32 {
-	if m != nil {
-		return m.Uid
-	}
-	return 0
-}
-
-func (m *ReleaseMicInfo) GetTid() uint32 {
-	if m != nil {
-		return m.Tid
-	}
-	return 0
-}
-
-type ReleaseMicAckInfo struct {
-	Result               int32    `protobuf:"zigzag32,1,opt,name=result,proto3" json:"result,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *ReleaseMicAckInfo) Reset()         { *m = ReleaseMicAckInfo{} }
-func (m *ReleaseMicAckInfo) String() string { return proto.CompactTextString(m) }
-func (*ReleaseMicAckInfo) ProtoMessage()    {}
-func (*ReleaseMicAckInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d0f0a1b324c95b77, []int{12}
-}
-func (m *ReleaseMicAckInfo) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *ReleaseMicAckInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_ReleaseMicAckInfo.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *ReleaseMicAckInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ReleaseMicAckInfo.Merge(m, src)
-}
-func (m *ReleaseMicAckInfo) XXX_Size() int {
-	return m.Size()
-}
-func (m *ReleaseMicAckInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_ReleaseMicAckInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_ReleaseMicAckInfo proto.InternalMessageInfo
-
-func (m *ReleaseMicAckInfo) GetResult() int32 {
-	if m != nil {
-		return m.Result
-	}
-	return 0
-}
-
-type DisconnectInfo struct {
-	Uid                  uint32   `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *DisconnectInfo) Reset()         { *m = DisconnectInfo{} }
-func (m *DisconnectInfo) String() string { return proto.CompactTextString(m) }
-func (*DisconnectInfo) ProtoMessage()    {}
-func (*DisconnectInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d0f0a1b324c95b77, []int{13}
-}
-func (m *DisconnectInfo) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *DisconnectInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_DisconnectInfo.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *DisconnectInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DisconnectInfo.Merge(m, src)
-}
-func (m *DisconnectInfo) XXX_Size() int {
-	return m.Size()
-}
-func (m *DisconnectInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_DisconnectInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_DisconnectInfo proto.InternalMessageInfo
-
-func (m *DisconnectInfo) GetUid() uint32 {
-	if m != nil {
-		return m.Uid
-	}
-	return 0
-}
-
-type DisConnectAckInfo struct {
-	Result               int32    `protobuf:"zigzag32,1,opt,name=result,proto3" json:"result,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *DisConnectAckInfo) Reset()         { *m = DisConnectAckInfo{} }
-func (m *DisConnectAckInfo) String() string { return proto.CompactTextString(m) }
-func (*DisConnectAckInfo) ProtoMessage()    {}
-func (*DisConnectAckInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d0f0a1b324c95b77, []int{14}
-}
-func (m *DisConnectAckInfo) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *DisConnectAckInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_DisConnectAckInfo.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *DisConnectAckInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DisConnectAckInfo.Merge(m, src)
-}
-func (m *DisConnectAckInfo) XXX_Size() int {
-	return m.Size()
-}
-func (m *DisConnectAckInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_DisConnectAckInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_DisConnectAckInfo proto.InternalMessageInfo
-
-func (m *DisConnectAckInfo) GetResult() int32 {
-	if m != nil {
-		return m.Result
-	}
-	return 0
-}
-
 func init() {
 	proto.RegisterEnum("msg.MsgID", MsgID_name, MsgID_value)
 	proto.RegisterType((*Msg)(nil), "msg.Msg")
 	proto.RegisterType((*Command)(nil), "msg.Command")
 	proto.RegisterType((*AudioData)(nil), "msg.AudioData")
-	proto.RegisterType((*ConnectInfo)(nil), "msg.ConnectInfo")
-	proto.RegisterType((*ConnectAckInfo)(nil), "msg.ConnectAckInfo")
-	proto.RegisterType((*SubscribeTopicInfo)(nil), "msg.SubscribeTopicInfo")
-	proto.RegisterType((*SubscribeTopicAckInfo)(nil), "msg.SubscribeTopicAckInfo")
-	proto.RegisterType((*UnsubscribeTopicInfo)(nil), "msg.UnsubscribeTopicInfo")
-	proto.RegisterType((*UnsubscribeTopicAckInfo)(nil), "msg.UnsubscribeTopicAckInfo")
-	proto.RegisterType((*HoldMicInfo)(nil), "msg.HoldMicInfo")
-	proto.RegisterType((*HoldMicAckInfo)(nil), "msg.HoldMicAckInfo")
-	proto.RegisterType((*ReleaseMicInfo)(nil), "msg.ReleaseMicInfo")
-	proto.RegisterType((*ReleaseMicAckInfo)(nil), "msg.ReleaseMicAckInfo")
-	proto.RegisterType((*DisconnectInfo)(nil), "msg.DisconnectInfo")
-	proto.RegisterType((*DisConnectAckInfo)(nil), "msg.DisConnectAckInfo")
 }
 
 func init() { proto.RegisterFile("msg/msg.proto", fileDescriptor_d0f0a1b324c95b77) }
 
 var fileDescriptor_d0f0a1b324c95b77 = []byte{
-	// 659 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x55, 0xcd, 0x6e, 0xd3, 0x4c,
-	0x14, 0xad, 0x93, 0x26, 0x69, 0xae, 0x7f, 0x3a, 0xbd, 0xfd, 0xcb, 0xf7, 0xa9, 0x0a, 0x95, 0x17,
-	0x28, 0x6a, 0x51, 0xab, 0xb6, 0x20, 0x21, 0x84, 0x2a, 0x15, 0x66, 0xd1, 0x08, 0xb5, 0x48, 0x2e,
-	0x15, 0xeb, 0xc4, 0x36, 0xc1, 0x6a, 0x6d, 0x57, 0x99, 0x78, 0xc1, 0x93, 0xc0, 0x53, 0xf0, 0x1c,
-	0x2c, 0x79, 0x04, 0x14, 0x5e, 0x04, 0xcd, 0xd8, 0x63, 0x8f, 0xe3, 0x58, 0xca, 0x6e, 0xee, 0xc9,
-	0x39, 0xf7, 0xdc, 0xdc, 0x39, 0x93, 0x80, 0x19, 0xb2, 0xc9, 0x69, 0xc8, 0x26, 0x27, 0x4f, 0xd3,
-	0x78, 0x16, 0x63, 0x33, 0x64, 0x13, 0xfb, 0x1b, 0x34, 0x6f, 0xd8, 0x04, 0x0f, 0xa0, 0x19, 0x06,
-	0x5e, 0x4f, 0x3b, 0xd4, 0x06, 0xd6, 0x39, 0x9c, 0x70, 0xd2, 0x0d, 0x9b, 0x0c, 0xa9, 0xc3, 0x61,
-	0x7c, 0x0e, 0x1d, 0x37, 0x0e, 0xc3, 0x51, 0xe4, 0xf5, 0x1a, 0x87, 0xda, 0x40, 0x3f, 0x37, 0x04,
-	0xe3, 0x7d, 0x8a, 0x39, 0xf2, 0x43, 0x7c, 0x01, 0xdd, 0x51, 0xe2, 0x05, 0x31, 0x1d, 0xcd, 0x46,
-	0xbd, 0x75, 0xc1, 0xb4, 0x04, 0xf3, 0x4a, 0xa2, 0x4e, 0x41, 0xb0, 0x7f, 0xb6, 0xa0, 0x93, 0xb5,
-	0xc0, 0x23, 0xee, 0x10, 0x45, 0xbe, 0x3b, 0x13, 0x33, 0xe8, 0xe7, 0x24, 0x73, 0x10, 0xd8, 0x30,
-	0xfa, 0x12, 0x3b, 0x92, 0x80, 0x17, 0x00, 0xd9, 0xf1, 0xca, 0x7d, 0xc8, 0x06, 0xda, 0x56, 0xe9,
-	0x57, 0xee, 0x83, 0x50, 0x28, 0x34, 0x7c, 0x05, 0x5d, 0x96, 0x8c, 0x99, 0x3b, 0x0d, 0xc6, 0x7e,
-	0xaf, 0x29, 0x34, 0xfb, 0x42, 0x73, 0x27, 0xd1, 0x4f, 0xf1, 0x53, 0xe0, 0x0a, 0x5d, 0xc1, 0xc4,
-	0x4b, 0x30, 0xf2, 0x82, 0xbb, 0xa5, 0x5f, 0xea, 0xff, 0x25, 0x4a, 0x69, 0x5a, 0xe2, 0xe3, 0x25,
-	0xe8, 0x49, 0xc4, 0xc6, 0x49, 0x66, 0xdc, 0x12, 0xf2, 0x03, 0x21, 0xbf, 0x8f, 0xd8, 0xd2, 0x06,
-	0xaa, 0x00, 0x29, 0x58, 0x4a, 0xc9, 0x27, 0x68, 0xaf, 0xd0, 0x62, 0x41, 0xc3, 0xb7, 0xfb, 0x35,
-	0x7e, 0xf4, 0x6e, 0x02, 0xb7, 0xd7, 0x51, 0xb6, 0x7b, 0x9d, 0x62, 0xe9, 0x76, 0x33, 0x02, 0xdf,
-	0x6e, 0x76, 0xe4, 0x6e, 0x1b, 0xca, 0x76, 0xaf, 0x73, 0x38, 0xdd, 0x6e, 0x41, 0xe3, 0xa2, 0xa9,
-	0xff, 0xe8, 0x8f, 0x98, 0xcf, 0x3d, 0xba, 0x8a, 0xc8, 0xc9, 0xe1, 0x54, 0x54, 0xd0, 0xf0, 0x2d,
-	0x98, 0x45, 0xc5, 0xcd, 0x40, 0xe8, 0xf6, 0x16, 0x74, 0xd2, 0xaf, 0x4c, 0xe6, 0x96, 0x5e, 0xc0,
-	0x64, 0x68, 0x74, 0xc5, 0x92, 0xe6, 0x70, 0x6a, 0x59, 0xd0, 0xb8, 0x65, 0x51, 0x71, 0x4b, 0x43,
-	0xb1, 0xa4, 0x01, 0x5b, 0x08, 0x50, 0x99, 0x6c, 0xdf, 0x41, 0x37, 0x0f, 0x32, 0x5a, 0xd0, 0xc8,
-	0x1e, 0xcc, 0x96, 0xd3, 0x08, 0x3c, 0x24, 0xd0, 0x4c, 0x82, 0xf4, 0x7d, 0x98, 0x0e, 0x3f, 0x72,
-	0x64, 0x16, 0x78, 0x22, 0x6c, 0xa6, 0xc3, 0x8f, 0x88, 0xb0, 0xee, 0xc9, 0xa7, 0x61, 0x38, 0xe2,
-	0x6c, 0x3f, 0x03, 0x5d, 0x49, 0xb9, 0x6c, 0xa3, 0xe5, 0x6d, 0xec, 0x01, 0x58, 0xe5, 0xb1, 0x70,
-	0x0f, 0xda, 0x53, 0x9f, 0x25, 0x8f, 0xb3, 0xcc, 0x3e, 0xab, 0xec, 0xd7, 0x80, 0xd5, 0x34, 0x57,
-	0x3b, 0xca, 0xc1, 0x1a, 0xf9, 0x60, 0xf6, 0x29, 0xec, 0x2e, 0x4d, 0x73, 0xad, 0xd5, 0x1b, 0xd8,
-	0x59, 0x0c, 0xdf, 0xca, 0x66, 0x67, 0xb0, 0x5f, 0x13, 0xdc, 0x5a, 0xbb, 0x33, 0xd0, 0x95, 0xb0,
-	0xae, 0xe4, 0x32, 0x00, 0xab, 0x1c, 0xd8, 0xda, 0xe6, 0x2f, 0xc1, 0x2a, 0xa7, 0x74, 0xa5, 0xfe,
-	0xc7, 0xb0, 0x55, 0xc9, 0x68, 0xad, 0x85, 0x0d, 0x56, 0x39, 0x95, 0x4b, 0xee, 0xf9, 0x18, 0xb6,
-	0x2a, 0x09, 0xac, 0x6b, 0x78, 0xf4, 0xbd, 0x01, 0x2d, 0xf1, 0x03, 0x8d, 0x3a, 0x74, 0xee, 0x6f,
-	0x3f, 0xdc, 0x7e, 0xfc, 0x7c, 0x4b, 0xd6, 0xd0, 0x84, 0xae, 0x0c, 0x13, 0x25, 0x1a, 0x12, 0x30,
-	0x94, 0x7e, 0x94, 0x34, 0x70, 0x07, 0xc8, 0x42, 0x44, 0x28, 0x69, 0xe2, 0x3e, 0x6c, 0x57, 0xaf,
-	0x9f, 0x92, 0x75, 0xdc, 0x03, 0xac, 0x5c, 0x33, 0x25, 0x2d, 0xfc, 0x0f, 0x76, 0x97, 0x5d, 0x21,
-	0x25, 0x6d, 0x3e, 0x82, 0xbc, 0x2a, 0x4a, 0x3a, 0x7c, 0x04, 0x51, 0x0e, 0x33, 0xc2, 0x06, 0x47,
-	0x94, 0x75, 0x53, 0xd2, 0xc5, 0x6d, 0xd8, 0x2c, 0xaf, 0x92, 0x12, 0xe0, 0x34, 0x65, 0x65, 0x94,
-	0xe8, 0x9c, 0x56, 0x5e, 0x10, 0x25, 0x06, 0x6e, 0x82, 0x9e, 0xbf, 0xc9, 0x21, 0x25, 0xe6, 0x3b,
-	0xf2, 0x6b, 0xde, 0xd7, 0x7e, 0xcf, 0xfb, 0xda, 0x9f, 0x79, 0x5f, 0xfb, 0xf1, 0xb7, 0xbf, 0x36,
-	0x6e, 0x8b, 0xbf, 0xbb, 0x8b, 0x7f, 0x01, 0x00, 0x00, 0xff, 0xff, 0xb6, 0xf3, 0x1b, 0x24, 0xff,
-	0x06, 0x00, 0x00,
+	// 430 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x5c, 0x92, 0x5d, 0x8a, 0xdb, 0x30,
+	0x10, 0xc7, 0x57, 0x76, 0x12, 0xd7, 0x93, 0x2f, 0xed, 0x6c, 0x3f, 0x5c, 0x58, 0x42, 0xc8, 0x43,
+	0x09, 0xa5, 0x6c, 0x61, 0x7b, 0x82, 0x6d, 0xf4, 0x50, 0x53, 0x92, 0x16, 0xb5, 0x4b, 0x9f, 0x1d,
+	0x4b, 0x18, 0xb1, 0x6b, 0x2b, 0x44, 0x4a, 0xa1, 0x37, 0xe9, 0x2d, 0x7a, 0x8d, 0x3e, 0xb6, 0x37,
+	0x28, 0xe9, 0x45, 0x16, 0xc9, 0x76, 0xc2, 0xe6, 0x6d, 0xe6, 0xe7, 0xdf, 0x88, 0xff, 0x0c, 0x86,
+	0x61, 0x69, 0x8a, 0xb7, 0xa5, 0x29, 0xae, 0x36, 0x5b, 0x6d, 0x35, 0x86, 0xa5, 0x29, 0x66, 0x7f,
+	0x09, 0x84, 0x4b, 0x53, 0x60, 0x02, 0xd1, 0x77, 0xb9, 0x35, 0x4a, 0x57, 0x09, 0x99, 0x92, 0xf9,
+	0x39, 0x6f, 0x5b, 0xbc, 0x84, 0xb0, 0x54, 0x22, 0x09, 0xa6, 0x64, 0x3e, 0xba, 0x86, 0x2b, 0x37,
+	0xbf, 0x34, 0x45, 0xca, 0xb8, 0xc3, 0x48, 0x21, 0xdc, 0x29, 0x91, 0x84, 0x53, 0x32, 0x1f, 0x72,
+	0x57, 0x3a, 0x62, 0x95, 0x48, 0x3a, 0x35, 0xb1, 0x4a, 0xe0, 0x2b, 0x88, 0x72, 0x5d, 0x96, 0x59,
+	0x25, 0x92, 0xee, 0x94, 0xcc, 0xfb, 0xd7, 0x03, 0xff, 0xca, 0xa2, 0x66, 0xbc, 0xfd, 0x88, 0x6f,
+	0x20, 0xce, 0x76, 0x42, 0x69, 0x96, 0xd9, 0x2c, 0xe9, 0x79, 0x73, 0xe4, 0xcd, 0x9b, 0x96, 0xf2,
+	0xa3, 0xe0, 0x12, 0x67, 0xf9, 0xdd, 0x42, 0x0b, 0x99, 0x44, 0x75, 0xe2, 0xa6, 0x9d, 0xc5, 0x10,
+	0x35, 0x6f, 0xcf, 0x32, 0x88, 0x0f, 0xc3, 0x38, 0x82, 0x40, 0x89, 0x66, 0xbd, 0x40, 0x09, 0x44,
+	0xe8, 0xd8, 0xcd, 0x0f, 0xe9, 0x57, 0x3b, 0xe7, 0xbe, 0xc6, 0x4b, 0x88, 0xad, 0x2a, 0xa5, 0xb1,
+	0x59, 0xb9, 0xf1, 0x69, 0x3b, 0xfc, 0x08, 0xdc, 0x84, 0x68, 0xc3, 0x0d, 0xb8, 0xaf, 0x5f, 0xff,
+	0x0a, 0xa0, 0xeb, 0x0f, 0x82, 0x7d, 0x88, 0x6e, 0x57, 0x1f, 0x57, 0x9f, 0xbe, 0xad, 0xe8, 0x19,
+	0x0e, 0x21, 0x5e, 0xe8, 0xaa, 0x92, 0xb9, 0x4d, 0x19, 0x25, 0x48, 0x61, 0xd0, 0xb4, 0x37, 0xf9,
+	0x5d, 0xca, 0x68, 0x80, 0x4f, 0x81, 0x7e, 0xd9, 0xad, 0x4d, 0xbe, 0x55, 0x6b, 0xf9, 0x55, 0x6f,
+	0x54, 0x9e, 0x32, 0x1a, 0xe2, 0x0b, 0xb8, 0x78, 0x4c, 0x6b, 0xbd, 0x83, 0xcf, 0x01, 0x6f, 0x2b,
+	0x73, 0x3a, 0xd0, 0xc5, 0x97, 0xf0, 0xec, 0x94, 0xd7, 0x23, 0x3d, 0x17, 0xe1, 0x83, 0xbe, 0x17,
+	0x4b, 0x6f, 0x46, 0x2e, 0x82, 0x6f, 0xd3, 0x46, 0x78, 0xe2, 0x08, 0x97, 0xf7, 0x32, 0x33, 0xb2,
+	0x76, 0x62, 0xbc, 0x80, 0xf1, 0x91, 0xd4, 0x1a, 0x38, 0x8d, 0x29, 0x93, 0x1f, 0xb6, 0xe9, 0x3b,
+	0x8d, 0x29, 0xf3, 0x68, 0xa1, 0x01, 0x8e, 0xa1, 0x7f, 0xb8, 0x75, 0xca, 0xe8, 0x10, 0x01, 0x7a,
+	0x9f, 0x55, 0x55, 0xa4, 0x8c, 0x8e, 0x7c, 0xad, 0x7d, 0x3d, 0x7e, 0x4f, 0x7f, 0xef, 0x27, 0xe4,
+	0xcf, 0x7e, 0x42, 0xfe, 0xed, 0x27, 0xe4, 0xe7, 0xff, 0xc9, 0xd9, 0xba, 0xe7, 0xff, 0xc8, 0x77,
+	0x0f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x31, 0x92, 0x6f, 0x08, 0xa2, 0x02, 0x00, 0x00,
 }
 
 func (m *Msg) Marshal() (dAtA []byte, err error) {
@@ -1039,6 +358,11 @@ func (m *Msg) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i -= len(m.XXX_unrecognized)
 		copy(dAtA[i:], m.XXX_unrecognized)
 	}
+	if m.AckCode != 0 {
+		i = encodeVarintMsg(dAtA, i, uint64((uint32(m.AckCode)<<1)^uint32((m.AckCode>>31))))
+		i--
+		dAtA[i] = 0x38
+	}
 	if m.AudioData != nil {
 		{
 			size, err := m.AudioData.MarshalToSizedBuffer(dAtA[:i])
@@ -1049,7 +373,7 @@ func (m *Msg) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			i = encodeVarintMsg(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x22
+		dAtA[i] = 0x32
 	}
 	if m.Command != nil {
 		{
@@ -1061,10 +385,25 @@ func (m *Msg) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			i = encodeVarintMsg(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x12
+		dAtA[i] = 0x2a
+	}
+	if m.Tid != 0 {
+		i = encodeVarintMsg(dAtA, i, uint64(m.Tid))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.Uid != 0 {
+		i = encodeVarintMsg(dAtA, i, uint64(m.Uid))
+		i--
+		dAtA[i] = 0x18
 	}
 	if m.Mid != 0 {
 		i = encodeVarintMsg(dAtA, i, uint64(m.Mid))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.Version != 0 {
+		i = encodeVarintMsg(dAtA, i, uint64((uint32(m.Version)<<1)^uint32((m.Version>>31))))
 		i--
 		dAtA[i] = 0x8
 	}
@@ -1094,150 +433,6 @@ func (m *Command) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	if m.XXX_unrecognized != nil {
 		i -= len(m.XXX_unrecognized)
 		copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	if m.DisconnectAck != nil {
-		{
-			size, err := m.DisconnectAck.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintMsg(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x62
-	}
-	if m.Disconnect != nil {
-		{
-			size, err := m.Disconnect.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintMsg(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x5a
-	}
-	if m.ReleaseMicAck != nil {
-		{
-			size, err := m.ReleaseMicAck.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintMsg(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x52
-	}
-	if m.ReleaseMic != nil {
-		{
-			size, err := m.ReleaseMic.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintMsg(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x4a
-	}
-	if m.HoldMicAck != nil {
-		{
-			size, err := m.HoldMicAck.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintMsg(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x42
-	}
-	if m.HoldMic != nil {
-		{
-			size, err := m.HoldMic.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintMsg(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x3a
-	}
-	if m.UnsbuscribeAck != nil {
-		{
-			size, err := m.UnsbuscribeAck.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintMsg(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x32
-	}
-	if m.Unsbuscribe != nil {
-		{
-			size, err := m.Unsbuscribe.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintMsg(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x2a
-	}
-	if m.SubscribeAck != nil {
-		{
-			size, err := m.SubscribeAck.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintMsg(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x22
-	}
-	if m.Subscribe != nil {
-		{
-			size, err := m.Subscribe.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintMsg(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x1a
-	}
-	if m.ConnectAck != nil {
-		{
-			size, err := m.ConnectAck.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintMsg(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x12
-	}
-	if m.Connect != nil {
-		{
-			size, err := m.Connect.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintMsg(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
@@ -1271,424 +466,20 @@ func (m *AudioData) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		copy(dAtA[i:], m.Data)
 		i = encodeVarintMsg(dAtA, i, uint64(len(m.Data)))
 		i--
-		dAtA[i] = 0x22
+		dAtA[i] = 0x32
 	}
-	if m.Tid != 0 {
-		i = encodeVarintMsg(dAtA, i, uint64(m.Tid))
+	if m.Timestamp != 0 {
+		i = encodeVarintMsg(dAtA, i, uint64(m.Timestamp))
 		i--
-		dAtA[i] = 0x18
+		dAtA[i] = 0x28
 	}
-	if m.Uid != 0 {
-		i = encodeVarintMsg(dAtA, i, uint64(m.Uid))
+	if m.Tpye != 0 {
+		i = encodeVarintMsg(dAtA, i, uint64((uint32(m.Tpye)<<1)^uint32((m.Tpye>>31))))
 		i--
 		dAtA[i] = 0x10
 	}
 	if m.Id != 0 {
 		i = encodeVarintMsg(dAtA, i, uint64((uint32(m.Id)<<1)^uint32((m.Id>>31))))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *ConnectInfo) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *ConnectInfo) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *ConnectInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.XXX_unrecognized != nil {
-		i -= len(m.XXX_unrecognized)
-		copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	if m.Uid != 0 {
-		i = encodeVarintMsg(dAtA, i, uint64(m.Uid))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *ConnectAckInfo) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *ConnectAckInfo) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *ConnectAckInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.XXX_unrecognized != nil {
-		i -= len(m.XXX_unrecognized)
-		copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	if m.Result != 0 {
-		i = encodeVarintMsg(dAtA, i, uint64((uint32(m.Result)<<1)^uint32((m.Result>>31))))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *SubscribeTopicInfo) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *SubscribeTopicInfo) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *SubscribeTopicInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.XXX_unrecognized != nil {
-		i -= len(m.XXX_unrecognized)
-		copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	if m.Tid != 0 {
-		i = encodeVarintMsg(dAtA, i, uint64(m.Tid))
-		i--
-		dAtA[i] = 0x10
-	}
-	if m.Uid != 0 {
-		i = encodeVarintMsg(dAtA, i, uint64(m.Uid))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *SubscribeTopicAckInfo) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *SubscribeTopicAckInfo) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *SubscribeTopicAckInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.XXX_unrecognized != nil {
-		i -= len(m.XXX_unrecognized)
-		copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	if m.Result != 0 {
-		i = encodeVarintMsg(dAtA, i, uint64((uint32(m.Result)<<1)^uint32((m.Result>>31))))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *UnsubscribeTopicInfo) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *UnsubscribeTopicInfo) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *UnsubscribeTopicInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.XXX_unrecognized != nil {
-		i -= len(m.XXX_unrecognized)
-		copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	if m.Tid != 0 {
-		i = encodeVarintMsg(dAtA, i, uint64(m.Tid))
-		i--
-		dAtA[i] = 0x10
-	}
-	if m.Uid != 0 {
-		i = encodeVarintMsg(dAtA, i, uint64(m.Uid))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *UnsubscribeTopicAckInfo) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *UnsubscribeTopicAckInfo) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *UnsubscribeTopicAckInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.XXX_unrecognized != nil {
-		i -= len(m.XXX_unrecognized)
-		copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	if m.Result != 0 {
-		i = encodeVarintMsg(dAtA, i, uint64((uint32(m.Result)<<1)^uint32((m.Result>>31))))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *HoldMicInfo) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *HoldMicInfo) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *HoldMicInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.XXX_unrecognized != nil {
-		i -= len(m.XXX_unrecognized)
-		copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	if m.Tid != 0 {
-		i = encodeVarintMsg(dAtA, i, uint64(m.Tid))
-		i--
-		dAtA[i] = 0x10
-	}
-	if m.Uid != 0 {
-		i = encodeVarintMsg(dAtA, i, uint64(m.Uid))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *HoldMicAckInfo) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *HoldMicAckInfo) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *HoldMicAckInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.XXX_unrecognized != nil {
-		i -= len(m.XXX_unrecognized)
-		copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	if m.Result != 0 {
-		i = encodeVarintMsg(dAtA, i, uint64((uint32(m.Result)<<1)^uint32((m.Result>>31))))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *ReleaseMicInfo) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *ReleaseMicInfo) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *ReleaseMicInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.XXX_unrecognized != nil {
-		i -= len(m.XXX_unrecognized)
-		copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	if m.Tid != 0 {
-		i = encodeVarintMsg(dAtA, i, uint64(m.Tid))
-		i--
-		dAtA[i] = 0x10
-	}
-	if m.Uid != 0 {
-		i = encodeVarintMsg(dAtA, i, uint64(m.Uid))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *ReleaseMicAckInfo) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *ReleaseMicAckInfo) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *ReleaseMicAckInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.XXX_unrecognized != nil {
-		i -= len(m.XXX_unrecognized)
-		copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	if m.Result != 0 {
-		i = encodeVarintMsg(dAtA, i, uint64((uint32(m.Result)<<1)^uint32((m.Result>>31))))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *DisconnectInfo) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *DisconnectInfo) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *DisconnectInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.XXX_unrecognized != nil {
-		i -= len(m.XXX_unrecognized)
-		copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	if m.Uid != 0 {
-		i = encodeVarintMsg(dAtA, i, uint64(m.Uid))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *DisConnectAckInfo) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *DisConnectAckInfo) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *DisConnectAckInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.XXX_unrecognized != nil {
-		i -= len(m.XXX_unrecognized)
-		copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	if m.Result != 0 {
-		i = encodeVarintMsg(dAtA, i, uint64((uint32(m.Result)<<1)^uint32((m.Result>>31))))
 		i--
 		dAtA[i] = 0x8
 	}
@@ -1712,8 +503,17 @@ func (m *Msg) Size() (n int) {
 	}
 	var l int
 	_ = l
+	if m.Version != 0 {
+		n += 1 + sozMsg(uint64(m.Version))
+	}
 	if m.Mid != 0 {
 		n += 1 + sovMsg(uint64(m.Mid))
+	}
+	if m.Uid != 0 {
+		n += 1 + sovMsg(uint64(m.Uid))
+	}
+	if m.Tid != 0 {
+		n += 1 + sovMsg(uint64(m.Tid))
 	}
 	if m.Command != nil {
 		l = m.Command.Size()
@@ -1722,6 +522,9 @@ func (m *Msg) Size() (n int) {
 	if m.AudioData != nil {
 		l = m.AudioData.Size()
 		n += 1 + l + sovMsg(uint64(l))
+	}
+	if m.AckCode != 0 {
+		n += 1 + sozMsg(uint64(m.AckCode))
 	}
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
@@ -1735,54 +538,6 @@ func (m *Command) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.Connect != nil {
-		l = m.Connect.Size()
-		n += 1 + l + sovMsg(uint64(l))
-	}
-	if m.ConnectAck != nil {
-		l = m.ConnectAck.Size()
-		n += 1 + l + sovMsg(uint64(l))
-	}
-	if m.Subscribe != nil {
-		l = m.Subscribe.Size()
-		n += 1 + l + sovMsg(uint64(l))
-	}
-	if m.SubscribeAck != nil {
-		l = m.SubscribeAck.Size()
-		n += 1 + l + sovMsg(uint64(l))
-	}
-	if m.Unsbuscribe != nil {
-		l = m.Unsbuscribe.Size()
-		n += 1 + l + sovMsg(uint64(l))
-	}
-	if m.UnsbuscribeAck != nil {
-		l = m.UnsbuscribeAck.Size()
-		n += 1 + l + sovMsg(uint64(l))
-	}
-	if m.HoldMic != nil {
-		l = m.HoldMic.Size()
-		n += 1 + l + sovMsg(uint64(l))
-	}
-	if m.HoldMicAck != nil {
-		l = m.HoldMicAck.Size()
-		n += 1 + l + sovMsg(uint64(l))
-	}
-	if m.ReleaseMic != nil {
-		l = m.ReleaseMic.Size()
-		n += 1 + l + sovMsg(uint64(l))
-	}
-	if m.ReleaseMicAck != nil {
-		l = m.ReleaseMicAck.Size()
-		n += 1 + l + sovMsg(uint64(l))
-	}
-	if m.Disconnect != nil {
-		l = m.Disconnect.Size()
-		n += 1 + l + sovMsg(uint64(l))
-	}
-	if m.DisconnectAck != nil {
-		l = m.DisconnectAck.Size()
-		n += 1 + l + sovMsg(uint64(l))
-	}
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
 	}
@@ -1798,207 +553,15 @@ func (m *AudioData) Size() (n int) {
 	if m.Id != 0 {
 		n += 1 + sozMsg(uint64(m.Id))
 	}
-	if m.Uid != 0 {
-		n += 1 + sovMsg(uint64(m.Uid))
+	if m.Tpye != 0 {
+		n += 1 + sozMsg(uint64(m.Tpye))
 	}
-	if m.Tid != 0 {
-		n += 1 + sovMsg(uint64(m.Tid))
+	if m.Timestamp != 0 {
+		n += 1 + sovMsg(uint64(m.Timestamp))
 	}
 	l = len(m.Data)
 	if l > 0 {
 		n += 1 + l + sovMsg(uint64(l))
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
-func (m *ConnectInfo) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Uid != 0 {
-		n += 1 + sovMsg(uint64(m.Uid))
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
-func (m *ConnectAckInfo) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Result != 0 {
-		n += 1 + sozMsg(uint64(m.Result))
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
-func (m *SubscribeTopicInfo) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Uid != 0 {
-		n += 1 + sovMsg(uint64(m.Uid))
-	}
-	if m.Tid != 0 {
-		n += 1 + sovMsg(uint64(m.Tid))
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
-func (m *SubscribeTopicAckInfo) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Result != 0 {
-		n += 1 + sozMsg(uint64(m.Result))
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
-func (m *UnsubscribeTopicInfo) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Uid != 0 {
-		n += 1 + sovMsg(uint64(m.Uid))
-	}
-	if m.Tid != 0 {
-		n += 1 + sovMsg(uint64(m.Tid))
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
-func (m *UnsubscribeTopicAckInfo) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Result != 0 {
-		n += 1 + sozMsg(uint64(m.Result))
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
-func (m *HoldMicInfo) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Uid != 0 {
-		n += 1 + sovMsg(uint64(m.Uid))
-	}
-	if m.Tid != 0 {
-		n += 1 + sovMsg(uint64(m.Tid))
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
-func (m *HoldMicAckInfo) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Result != 0 {
-		n += 1 + sozMsg(uint64(m.Result))
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
-func (m *ReleaseMicInfo) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Uid != 0 {
-		n += 1 + sovMsg(uint64(m.Uid))
-	}
-	if m.Tid != 0 {
-		n += 1 + sovMsg(uint64(m.Tid))
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
-func (m *ReleaseMicAckInfo) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Result != 0 {
-		n += 1 + sozMsg(uint64(m.Result))
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
-func (m *DisconnectInfo) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Uid != 0 {
-		n += 1 + sovMsg(uint64(m.Uid))
-	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
-func (m *DisConnectAckInfo) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Result != 0 {
-		n += 1 + sozMsg(uint64(m.Result))
 	}
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
@@ -2043,6 +606,27 @@ func (m *Msg) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Version", wireType)
+			}
+			var v int32
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMsg
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			v = int32((uint32(v) >> 1) ^ uint32(((v&1)<<31)>>31))
+			m.Version = v
+		case 2:
+			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Mid", wireType)
 			}
 			m.Mid = 0
@@ -2060,7 +644,45 @@ func (m *Msg) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 2:
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Uid", wireType)
+			}
+			m.Uid = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMsg
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Uid |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Tid", wireType)
+			}
+			m.Tid = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMsg
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Tid |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Command", wireType)
 			}
@@ -2096,7 +718,7 @@ func (m *Msg) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 4:
+		case 6:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field AudioData", wireType)
 			}
@@ -2132,6 +754,27 @@ func (m *Msg) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 7:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AckCode", wireType)
+			}
+			var v int32
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMsg
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			v = int32((uint32(v) >> 1) ^ uint32(((v&1)<<31)>>31))
+			m.AckCode = v
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMsg(dAtA[iNdEx:])
@@ -2186,438 +829,6 @@ func (m *Command) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: Command: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Connect", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthMsg
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.Connect == nil {
-				m.Connect = &ConnectInfo{}
-			}
-			if err := m.Connect.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ConnectAck", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthMsg
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.ConnectAck == nil {
-				m.ConnectAck = &ConnectAckInfo{}
-			}
-			if err := m.ConnectAck.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Subscribe", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthMsg
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.Subscribe == nil {
-				m.Subscribe = &SubscribeTopicInfo{}
-			}
-			if err := m.Subscribe.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SubscribeAck", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthMsg
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.SubscribeAck == nil {
-				m.SubscribeAck = &SubscribeTopicAckInfo{}
-			}
-			if err := m.SubscribeAck.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 5:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Unsbuscribe", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthMsg
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.Unsbuscribe == nil {
-				m.Unsbuscribe = &UnsubscribeTopicAckInfo{}
-			}
-			if err := m.Unsbuscribe.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 6:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field UnsbuscribeAck", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthMsg
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.UnsbuscribeAck == nil {
-				m.UnsbuscribeAck = &UnsubscribeTopicAckInfo{}
-			}
-			if err := m.UnsbuscribeAck.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 7:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field HoldMic", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthMsg
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.HoldMic == nil {
-				m.HoldMic = &HoldMicInfo{}
-			}
-			if err := m.HoldMic.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 8:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field HoldMicAck", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthMsg
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.HoldMicAck == nil {
-				m.HoldMicAck = &HoldMicAckInfo{}
-			}
-			if err := m.HoldMicAck.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 9:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ReleaseMic", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthMsg
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.ReleaseMic == nil {
-				m.ReleaseMic = &ReleaseMicInfo{}
-			}
-			if err := m.ReleaseMic.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 10:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ReleaseMicAck", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthMsg
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.ReleaseMicAck == nil {
-				m.ReleaseMicAck = &ReleaseMicAckInfo{}
-			}
-			if err := m.ReleaseMicAck.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 11:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Disconnect", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthMsg
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.Disconnect == nil {
-				m.Disconnect = &DisconnectInfo{}
-			}
-			if err := m.Disconnect.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 12:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field DisconnectAck", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthMsg
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.DisconnectAck == nil {
-				m.DisconnectAck = &DisConnectAckInfo{}
-			}
-			if err := m.DisconnectAck.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMsg(dAtA[iNdEx:])
@@ -2695,9 +906,9 @@ func (m *AudioData) Unmarshal(dAtA []byte) error {
 			m.Id = v
 		case 2:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Uid", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Tpye", wireType)
 			}
-			m.Uid = 0
+			var v int32
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowMsg
@@ -2707,16 +918,18 @@ func (m *AudioData) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Uid |= uint32(b&0x7F) << shift
+				v |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-		case 3:
+			v = int32((uint32(v) >> 1) ^ uint32(((v&1)<<31)>>31))
+			m.Tpye = v
+		case 5:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Tid", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Timestamp", wireType)
 			}
-			m.Tid = 0
+			m.Timestamp = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowMsg
@@ -2726,12 +939,12 @@ func (m *AudioData) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Tid |= uint32(b&0x7F) << shift
+				m.Timestamp |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-		case 4:
+		case 6:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Data", wireType)
 			}
@@ -2765,970 +978,6 @@ func (m *AudioData) Unmarshal(dAtA []byte) error {
 				m.Data = []byte{}
 			}
 			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipMsg(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *ConnectInfo) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowMsg
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: ConnectInfo: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ConnectInfo: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Uid", wireType)
-			}
-			m.Uid = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Uid |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		default:
-			iNdEx = preIndex
-			skippy, err := skipMsg(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *ConnectAckInfo) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowMsg
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: ConnectAckInfo: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ConnectAckInfo: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Result", wireType)
-			}
-			var v int32
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				v |= int32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			v = int32((uint32(v) >> 1) ^ uint32(((v&1)<<31)>>31))
-			m.Result = v
-		default:
-			iNdEx = preIndex
-			skippy, err := skipMsg(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *SubscribeTopicInfo) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowMsg
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: SubscribeTopicInfo: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: SubscribeTopicInfo: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Uid", wireType)
-			}
-			m.Uid = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Uid |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Tid", wireType)
-			}
-			m.Tid = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Tid |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		default:
-			iNdEx = preIndex
-			skippy, err := skipMsg(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *SubscribeTopicAckInfo) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowMsg
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: SubscribeTopicAckInfo: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: SubscribeTopicAckInfo: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Result", wireType)
-			}
-			var v int32
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				v |= int32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			v = int32((uint32(v) >> 1) ^ uint32(((v&1)<<31)>>31))
-			m.Result = v
-		default:
-			iNdEx = preIndex
-			skippy, err := skipMsg(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *UnsubscribeTopicInfo) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowMsg
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: UnsubscribeTopicInfo: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: UnsubscribeTopicInfo: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Uid", wireType)
-			}
-			m.Uid = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Uid |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Tid", wireType)
-			}
-			m.Tid = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Tid |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		default:
-			iNdEx = preIndex
-			skippy, err := skipMsg(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *UnsubscribeTopicAckInfo) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowMsg
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: UnsubscribeTopicAckInfo: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: UnsubscribeTopicAckInfo: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Result", wireType)
-			}
-			var v int32
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				v |= int32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			v = int32((uint32(v) >> 1) ^ uint32(((v&1)<<31)>>31))
-			m.Result = v
-		default:
-			iNdEx = preIndex
-			skippy, err := skipMsg(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *HoldMicInfo) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowMsg
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: HoldMicInfo: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: HoldMicInfo: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Uid", wireType)
-			}
-			m.Uid = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Uid |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Tid", wireType)
-			}
-			m.Tid = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Tid |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		default:
-			iNdEx = preIndex
-			skippy, err := skipMsg(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *HoldMicAckInfo) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowMsg
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: HoldMicAckInfo: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: HoldMicAckInfo: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Result", wireType)
-			}
-			var v int32
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				v |= int32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			v = int32((uint32(v) >> 1) ^ uint32(((v&1)<<31)>>31))
-			m.Result = v
-		default:
-			iNdEx = preIndex
-			skippy, err := skipMsg(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *ReleaseMicInfo) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowMsg
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: ReleaseMicInfo: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ReleaseMicInfo: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Uid", wireType)
-			}
-			m.Uid = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Uid |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Tid", wireType)
-			}
-			m.Tid = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Tid |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		default:
-			iNdEx = preIndex
-			skippy, err := skipMsg(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *ReleaseMicAckInfo) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowMsg
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: ReleaseMicAckInfo: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ReleaseMicAckInfo: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Result", wireType)
-			}
-			var v int32
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				v |= int32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			v = int32((uint32(v) >> 1) ^ uint32(((v&1)<<31)>>31))
-			m.Result = v
-		default:
-			iNdEx = preIndex
-			skippy, err := skipMsg(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *DisconnectInfo) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowMsg
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: DisconnectInfo: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: DisconnectInfo: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Uid", wireType)
-			}
-			m.Uid = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Uid |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		default:
-			iNdEx = preIndex
-			skippy, err := skipMsg(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *DisConnectAckInfo) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowMsg
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: DisConnectAckInfo: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: DisConnectAckInfo: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Result", wireType)
-			}
-			var v int32
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				v |= int32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			v = int32((uint32(v) >> 1) ^ uint32(((v&1)<<31)>>31))
-			m.Result = v
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMsg(dAtA[iNdEx:])

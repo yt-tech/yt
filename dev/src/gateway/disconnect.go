@@ -10,7 +10,7 @@ import (
 func (g *gateway) disconnectRequest(rpcsess tp.Session, sess quic.Session, stream quic.Stream, message *msg.Msg) error {
 	mlog.Println("disconnectRequest----------------------->>>>>")
 	var result int32
-	rerr := rpcsess.Call("/manager/disconnect", message, &result, tp.WithAddMeta("author", "henrylee2cn")).Rerror()
+	rerr := rpcsess.Call("/manager/disconnect", message, &result).Rerror()
 	if rerr.ToError() != nil {
 		mlog.Println(rerr)
 		return rerr.ToError()

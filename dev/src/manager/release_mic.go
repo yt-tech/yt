@@ -7,11 +7,10 @@ import (
 )
 
 //Subscribetopic ..
-func (m *Manager) releasemic(requestMsg *msg.Msg) (result int32, terr *tp.Rerror) {
+func (m *Manager) releasemic(ytmsg *msg.Msg) (result int32, terr *tp.Rerror) {
 	mlog.Println("hold mic")
-	request := requestMsg.Command.GetHoldMic()
-	uid := request.GetUid()
-	tid := request.GetTid()
+	uid := ytmsg.GetUid()
+	tid := ytmsg.GetTid()
 	topicer, isEsixt := topics.Load(tid)
 	if isEsixt {
 		if topic, ok := topicer.(*topicInfo); ok {
@@ -22,7 +21,7 @@ func (m *Manager) releasemic(requestMsg *msg.Msg) (result int32, terr *tp.Rerror
 			}
 			for k, v := range topic.gateways {
 				mlog.Println(k, v)
-				broadcast(v, requestMsg)
+				broadcast(v, ytmsg)
 			}
 			topic.Unlock()
 			topics.Store(tid, topic)

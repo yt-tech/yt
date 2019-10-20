@@ -3,7 +3,6 @@ package gateway
 import (
 	"context"
 	"net"
-	"sync"
 	"yt/ytproto/msg"
 
 	ggproto "github.com/gogo/protobuf/proto"
@@ -17,21 +16,6 @@ type ytClientInfo struct {
 	quicSession         quic.Session
 	quicStream          quic.Stream
 	tpSession           tp.Session
-}
-
-var msgPool = sync.Pool{
-	New: func() interface{} {
-		return &msg.Msg{
-			Mid: 0,
-			Command: &msg.Command{
-				Connect:      &msg.ConnectInfo{},
-				Subscribe:    &msg.SubscribeTopicInfo{},
-				ConnectAck:   &msg.ConnectAckInfo{},
-				SubscribeAck: &msg.SubscribeTopicAckInfo{},
-			},
-			AudioData: &msg.AudioData{},
-		}
-	},
 }
 
 func (y *ytClientInfo) process() {
@@ -64,8 +48,8 @@ func (y *ytClientInfo) process() {
 				mlog.Println(err)
 				break
 			}
-			mlog.Println(message)
 
+			mlog.Println(message)
 			switch message.GetMid() {
 			case msg.MsgID_ConnectID:
 				buff, err = y.connectRequest(message)
@@ -74,29 +58,27 @@ func (y *ytClientInfo) process() {
 					y.quicSession.Close()
 					break
 				}
+				y.quicStream.Write(buff)
 				// clientsMap.LoadOrStore(y.quicSession.RemoteAddr().String(), uid)
 			case msg.MsgID_SubscribeTopicID:
-				buff, err = y.subscribeTopic(message)
-				if err != nil {
+				if buff, err = y.subscribeTopic(message); err != nil {
 					break
 				}
+				y.quicStream.Write(buff)
 			case msg.MsgID_UnsubscribeTopicID:
 			case msg.MsgID_HoldMicID:
 				if buff, err = y.holdMic(message); err != nil {
-					msgPool.Put(message)
 					break
 				}
+				y.quicStream.Write(buff)
 			case msg.MsgID_ReleaseMicID:
 			case msg.MsgID_DisconnectID:
 			case msg.MsgID_AudioDataID:
-				mlog.Println("----audio----")
-				y.audio(message)
+				y.audioReceive(message)
 			default:
 				mlog.Println("--------")
 				break
 			}
-			msgPool.Put(message)
-			y.quicStream.Write(buff)
 		}
 	}
 }

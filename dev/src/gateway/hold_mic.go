@@ -7,51 +7,46 @@ import (
 func (y *ytClientInfo) holdMic(message *msg.Msg) ([]byte, error) {
 	mlog.Println("hold mic")
 	var result int32
-	request := message.Command.GetHoldMic()
-	uid := request.GetUid()
-	tid := request.GetTid()
-	result = newHoldMic(uid, tid, result)
-	if result > 99 {
+	uid := message.GetUid()
+	tid := message.GetTid()
+	newHoldMic(uid, tid, &result)
+	if result > 20 {
 		return send2cliPack(message, msg.MsgID_HoldMIcAckID, result)
 	}
+	mlog.Printf("uid=%d hold mic in tid=%d result=%d\n", uid, tid, result)
 	if rerr := y.tpSession.Call("/manager/holdmic", message, &result).Rerror(); rerr != nil {
 		mlog.Println(rerr.String())
-		result = 500
+		result = 100
 	}
 	if result == 1 {
-		if buff, err := send2cliPack(message, msg.MsgID_HoldMIcAckID, result); err == nil {
+		buff, err := send2cliPack(message, msg.MsgID_HoldMIcAckID, result)
+		if err == nil {
 			mlog.Println("broadcast holdmic")
-			localBroadcastPush(uid, tid, buff)
-			return buff, err
+			localBroadcastPush(uid, tid, buff) //广播给当前网关的其他客户端端
+			return buff, nil
 		}
+		return nil, err
 	}
 	return send2cliPack(message, msg.MsgID_HoldMIcAckID, result)
 }
 
-// func holdMicBytes(message *msg.Msg, r int32) ([]byte, error) {
-// 	message.Mid = msg.MsgID_HoldMIcAckID
-// 	message.Command.HoldMicAck.Result = r
-// 	bf, err := message.Marshal()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return bf, nil
-// }
-
-func newHoldMic(uid, tid uint32, r int32) int32 {
+func newHoldMic(uid, tid uint32, result *int32) {
 	topicer, isExist := localTopicBroadcast.Load(tid)
 	if !isExist {
-		return 13
+		*result = 21
+		return
 	}
 	topic, ok := topicer.(*usersOfTopic)
 	if !ok {
-		return 103
+		*result = 22
+		return
 	}
 	topic.Lock()
 	if topic.holder == 0 || topic.holder == uid {
 		topic.holder = uid
-		r = 1
+		*result = 1
+	} else {
+		*result = 21
 	}
 	topic.Unlock()
-	return r
 }

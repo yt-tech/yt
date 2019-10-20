@@ -2,14 +2,12 @@ package gateway
 
 import (
 	"yt/ytproto/msg"
-
-	tp "github.com/henrylee2cn/teleport"
 )
 
 func (y *ytClientInfo) connectRequest(message *msg.Msg) ([]byte, error) {
 	mlog.Println("ConnectRequest----------------------->>>>>")
 	var result int32
-	rerr := y.tpSession.Call("/manager/connect", message, &result, tp.WithAddMeta("author", "henrylee2cn")).Rerror()
+	rerr := y.tpSession.Call("/manager/connect", message, &result).Rerror()
 	if rerr.ToError() != nil {
 		mlog.Println(rerr)
 		return nil, rerr.ToError()

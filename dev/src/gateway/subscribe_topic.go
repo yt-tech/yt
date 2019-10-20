@@ -15,9 +15,8 @@ func (y *ytClientInfo) subscribeTopic(message *msg.Msg) ([]byte, error) {
 		mlog.Println(rerr.String())
 		return nil, rerr.ToError()
 	}
-	request := message.Command.GetSubscribe()
-	uid := request.GetUid()
-	tid := request.GetTid()
+	uid := message.GetUid()
+	tid := message.GetTid()
 	result = y.preStorageTopicBroadcastStream(uid, tid, result)
 	buff, err := send2cliPack(message, msg.MsgID_SubscribeTopicAckID, result)
 	if err != nil {

@@ -11,8 +11,6 @@ func packAudioData() ([]byte, error) {
 		Mid: msg.MsgID_AudioDataID,
 		AudioData: &msg.AudioData{
 			Id:   24,
-			Uid:  1,
-			Tid:  1,
 			Data: []byte("---11111---"),
 		},
 	}

@@ -19,10 +19,17 @@ type usersOfTopic struct {
 	holder uint32
 }
 
-
 //Push ..
 func (b *Broadcast) Push(bmsg *msg.Msg) *tp.Rerror {
 	mlog.Println(bmsg)
+	uid := bmsg.GetUid()
+	tid := bmsg.GetTid()
+	buff, err := bmsg.Marshal()
+	if err != nil {
+		localBroadcastPush(uid, tid, buff)
+
+	}
+	mlog.Println(err)
 	return nil
 }
 func localBroadcastPush(uid, tid uint32, buff []byte) {

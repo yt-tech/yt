@@ -19,9 +19,8 @@ func (m *Manager) Unsubscribetopic(requestMsg *msg.Msg) (result int32, terr *tp.
 		return 0, tp.NewRerror(11, "断言失败", "")
 	}
 	var topic *topicInfo
-	request := requestMsg.Command.GetSubscribe()
-	uid := request.GetUid()
-	tid := request.GetTid()
+	uid := requestMsg.GetUid()
+	tid := requestMsg.GetTid()
 	topicer, isEsixt := topics.Load(tid)
 	if isEsixt {
 		if topic, ok = topicer.(*topicInfo); ok {
