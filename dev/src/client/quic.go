@@ -1,14 +1,8 @@
 package client
 
 import (
-	"crypto/tls"
-	"yt/ytproto/msg"
-
-	ggproto "github.com/gogo/protobuf/proto"
 	"github.com/lucas-clemente/quic-go"
 )
-
-var quicStream quic.Stream
 
 type clientInfo struct {
 	uid     uint32
@@ -17,34 +11,32 @@ type clientInfo struct {
 }
 
 func (c *clientInfo) openQuic() {
-	tlsConf := &tls.Config{
-		InsecureSkipVerify: true,
-		NextProtos:         []string{"quic-echo-example"},
-	}
+	tlsConf := settingQuic()
 	session, err := quic.DialAddr(quicServeAddr(), tlsConf, nil)
 	if err != nil {
 		mlog.Println(err)
 	}
-	quicStream, err = session.OpenStream()
-	if err != nil {
-		mlog.Println(err)
-	}
-	mlog.Printf("streamID=%d\n", quicStream.StreamID())
-	go func() {
-		inBuffer := make([]byte, 1024)
-		var message = &msg.Msg{}
-		for {
-			nn, _ := quicStream.Read(inBuffer)
-			mlog.Println(inBuffer[:nn])
-			err = ggproto.Unmarshal(inBuffer[:nn], message)
-			if err != nil {
-				mlog.Println(err)
-				break
-			}
+	c.session = session
+	// quicStream, err = session.OpenStream()
+	// if err != nil {
+	// 	mlog.Println(err)
+	// }
+	// mlog.Printf("streamID=%d\n", quicStream.StreamID())
+	// go func() {
+	// 	inBuffer := make([]byte, 1024)
+	// 	var message = &msg.Msg{}
+	// 	for {
+	// 		nn, _ := quicStream.Read(inBuffer)
+	// 		mlog.Println(inBuffer[:nn])
+	// 		err = ggproto.Unmarshal(inBuffer[:nn], message)
+	// 		if err != nil {
+	// 			mlog.Println(err)
+	// 			break
+	// 		}
 
-			mlog.Println(message)
-		}
-	}()
+	// 		mlog.Println(message)
+	// 	}
+	// }()
 	// 	}
 	// }()
 

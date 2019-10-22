@@ -2,6 +2,7 @@ package client
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -19,15 +20,21 @@ func Start() {
 	cli := newClient()
 	// gatewayAddr = getDisp()
 	mlog.Println(gatewayAddr)
-	openQuic()
+	cli.openQuic()
 	// time.Sleep(1e9)
-	logger.Debug("sdfsdfsdf testset")
+	// logger.Debug("sdfsdfsdf testset")
 	go func() {
-		//  receiver ,err :=
+		rcev, err := cli.session.AcceptUniStream(context.Background())
+		if err != nil {
+			mlog.Println(err)
+		}
+		ba := make([]byte, 1024)
 		for {
-
+			n, err := rcev.Read(ba)
+			mlog.Println(string(ba[:n]), err)
 		}
 	}()
+	quicStream, _ := cli.session.OpenStream()
 	for {
 		f := bufio.NewReader(os.Stdin) //读取输入的内容
 		fmt.Print("请输入命令->")
@@ -55,8 +62,23 @@ func Start() {
 					return
 				}
 				mlog.Println(err)
-				quicStream.SetDeadline(time.Now().Add(3e9))
 				quicStream.Write(data)
+				quicStream.SetReadDeadline(time.Now().Add(3e9))
+				bf := make([]byte, 1024)
+				n, err := quicStream.Read(bf)
+				if err == nil {
+					if string(bf[:n]) == "id" {
+						mlog.Println(string(bf[:n]))
+					} else {
+						mlog.Println("timeout data")
+						mlog.Println("read new data")
+						ne, err := quicStream.Read(bf)
+						mlog.Println(string(bf[:ne]), err)
+					}
+					continue
+				} else {
+					mlog.Println(err)
+				}
 			case a == "2":
 				fmt.Println("sub")
 				data, err := packSubscribeTopic()

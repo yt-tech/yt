@@ -15,6 +15,7 @@ type ytClientInfo struct {
 	topicPushServerAddr *net.UDPAddr
 	quicSession         quic.Session
 	quicStream          quic.Stream
+	broadcastStream     quic.SendStream
 	tpSession           tp.Session
 }
 
@@ -23,6 +24,11 @@ func (y *ytClientInfo) process() {
 		mlog.Fatalln("rpcsess or sess is nil ")
 	}
 	var err error
+	y.broadcastStream, err = y.quicSession.OpenUniStream()
+	if err != nil {
+		mlog.Println(err)
+	}
+
 	for {
 		y.quicStream, err = y.quicSession.AcceptStream(context.Background())
 		if err != nil {
