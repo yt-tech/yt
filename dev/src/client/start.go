@@ -2,12 +2,14 @@ package client
 
 import (
 	"bufio"
-	"context"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 	"time"
+	"yt/ytproto/msg"
+
+	ggproto "github.com/gogo/protobuf/proto"
 )
 
 var gatewayAddr string
@@ -17,24 +19,27 @@ var outDataChannel = make(chan []byte, 100)
 
 //Start ..
 func Start() {
-	cli := newClient()
+	cli := newClient(2, 1)
 	// gatewayAddr = getDisp()
 	mlog.Println(gatewayAddr)
 	cli.openQuic()
 	// time.Sleep(1e9)
-	// logger.Debug("sdfsdfsdf testset")
+	// logger.Debug("start zap log")
 	go func() {
-		rcev, err := cli.session.AcceptUniStream(context.Background())
-		if err != nil {
-			mlog.Println(err)
+		tike := time.NewTicker(10e9)
+		cm := &msg.Msg{
+			CmdID: msg.CMDID_Ping,
+			Uid:   9,
 		}
-		ba := make([]byte, 1024)
+		pingBytes, _ := ggproto.Marshal(cm)
 		for {
-			n, err := rcev.Read(ba)
-			mlog.Println(string(ba[:n]), err)
+			select {
+			case <-tike.C:
+				cli.quicStream.Write(pingBytes)
+			}
 		}
 	}()
-	quicStream, _ := cli.session.OpenStream()
+
 	for {
 		f := bufio.NewReader(os.Stdin) //读取输入的内容
 		fmt.Print("请输入命令->")
@@ -47,57 +52,36 @@ func Start() {
 			break
 		}
 		//cmd=1 uid=1 tid=1
-		ss := strings.Split(Input, " ")
-		c1 := strings.Contains(ss[0], "cmd")
-		c2 := strings.Contains(ss[1], "uid")
-		c3 := strings.Contains(ss[2], "tid")
-		a := ss[0][4:]
-		if c1 && c2 && c3 {
+		c1 := strings.Contains(Input, "cmd")
+		a := Input[4:5]
+		if c1 {
 			switch {
 			case a == "1":
 				fmt.Println("connect")
-				data, err := packConnectData()
+				err = cli.connect()
 				if err != nil {
-					mlog.Println(err)
-					return
-				}
-				mlog.Println(err)
-				quicStream.Write(data)
-				quicStream.SetReadDeadline(time.Now().Add(3e9))
-				bf := make([]byte, 1024)
-				n, err := quicStream.Read(bf)
-				if err == nil {
-					if string(bf[:n]) == "id" {
-						mlog.Println(string(bf[:n]))
-					} else {
-						mlog.Println("timeout data")
-						mlog.Println("read new data")
-						ne, err := quicStream.Read(bf)
-						mlog.Println(string(bf[:ne]), err)
-					}
-					continue
-				} else {
 					mlog.Println(err)
 				}
 			case a == "2":
 				fmt.Println("sub")
-				data, err := packSubscribeTopic()
+				err = cli.subscribeTopic()
 				if err != nil {
 					mlog.Println(err)
-					return
 				}
-				quicStream.Write(data)
 			case a == "3":
 				fmt.Println("hold mic")
+				err = cli.holdMic()
+				if err != nil {
+					mlog.Println(err)
+				}
 				go func() {
-					for {
+					for it := 0; it < 10; it++ {
 						data, err := packAudioData()
 						if err != nil {
 							mlog.Println(err)
 							return
 						}
-						mlog.Println(data)
-						quicStream.Write(data)
+						cli.quicStream.Write(data)
 						time.Sleep(12e7)
 					}
 				}()

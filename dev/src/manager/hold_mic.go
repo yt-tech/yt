@@ -6,8 +6,8 @@ import (
 	tp "github.com/henrylee2cn/teleport"
 )
 
-//Subscribetopic ..
-func (m *Manager) holdmic(ytmsg *msg.Msg) (result int32, terr *tp.Rerror) {
+//Holdmic ..
+func (m *Manager) Holdmic(ytmsg *msg.Msg) (result int32, terr *tp.Rerror) {
 	uid := ytmsg.GetUid()
 	tid := ytmsg.GetTid()
 	mlog.Printf("uid=%d hold mic in tid=%d\n", uid, tid)

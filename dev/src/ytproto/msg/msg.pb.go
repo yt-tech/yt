@@ -22,79 +22,79 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-type MsgID int32
+type CMDID int32
 
 const (
-	MsgID_UNKNOWN               MsgID = 0
-	MsgID_ConnectID             MsgID = 1
-	MsgID_ConnectAckID          MsgID = 2
-	MsgID_SubscribeTopicID      MsgID = 3
-	MsgID_SubscribeTopicAckID   MsgID = 4
-	MsgID_UnsubscribeTopicID    MsgID = 5
-	MsgID_UnsubscribeTopicAckID MsgID = 6
-	MsgID_HoldMicID             MsgID = 7
-	MsgID_HoldMIcAckID          MsgID = 8
-	MsgID_ReleaseMicID          MsgID = 9
-	MsgID_ReleaseMicAckID       MsgID = 10
-	MsgID_DisconnectID          MsgID = 11
-	MsgID_DisConnectAckID       MsgID = 12
-	MsgID_AudioDataID           MsgID = 13
-	MsgID_PingID                MsgID = 14
-	MsgID_PongID                MsgID = 15
+	CMDID_UNKNOWN             CMDID = 0
+	CMDID_Connect             CMDID = 1
+	CMDID_ConnectAck          CMDID = 2
+	CMDID_SubscribeTopic      CMDID = 3
+	CMDID_SubscribeTopicAck   CMDID = 4
+	CMDID_UnsubscribeTopic    CMDID = 5
+	CMDID_UnsubscribeTopicAck CMDID = 6
+	CMDID_HoldMic             CMDID = 7
+	CMDID_HoldMicAck          CMDID = 8
+	CMDID_ReleaseMic          CMDID = 9
+	CMDID_ReleaseMicAck       CMDID = 10
+	CMDID_Disconnect          CMDID = 11
+	CMDID_DisConnectAck       CMDID = 12
+	CMDID_Audio               CMDID = 13
+	CMDID_Ping                CMDID = 14
+	CMDID_Pong                CMDID = 15
 )
 
-var MsgID_name = map[int32]string{
+var CMDID_name = map[int32]string{
 	0:  "UNKNOWN",
-	1:  "ConnectID",
-	2:  "ConnectAckID",
-	3:  "SubscribeTopicID",
-	4:  "SubscribeTopicAckID",
-	5:  "UnsubscribeTopicID",
-	6:  "UnsubscribeTopicAckID",
-	7:  "HoldMicID",
-	8:  "HoldMIcAckID",
-	9:  "ReleaseMicID",
-	10: "ReleaseMicAckID",
-	11: "DisconnectID",
-	12: "DisConnectAckID",
-	13: "AudioDataID",
-	14: "PingID",
-	15: "PongID",
+	1:  "Connect",
+	2:  "ConnectAck",
+	3:  "SubscribeTopic",
+	4:  "SubscribeTopicAck",
+	5:  "UnsubscribeTopic",
+	6:  "UnsubscribeTopicAck",
+	7:  "HoldMic",
+	8:  "HoldMicAck",
+	9:  "ReleaseMic",
+	10: "ReleaseMicAck",
+	11: "Disconnect",
+	12: "DisConnectAck",
+	13: "Audio",
+	14: "Ping",
+	15: "Pong",
 }
 
-var MsgID_value = map[string]int32{
-	"UNKNOWN":               0,
-	"ConnectID":             1,
-	"ConnectAckID":          2,
-	"SubscribeTopicID":      3,
-	"SubscribeTopicAckID":   4,
-	"UnsubscribeTopicID":    5,
-	"UnsubscribeTopicAckID": 6,
-	"HoldMicID":             7,
-	"HoldMIcAckID":          8,
-	"ReleaseMicID":          9,
-	"ReleaseMicAckID":       10,
-	"DisconnectID":          11,
-	"DisConnectAckID":       12,
-	"AudioDataID":           13,
-	"PingID":                14,
-	"PongID":                15,
+var CMDID_value = map[string]int32{
+	"UNKNOWN":             0,
+	"Connect":             1,
+	"ConnectAck":          2,
+	"SubscribeTopic":      3,
+	"SubscribeTopicAck":   4,
+	"UnsubscribeTopic":    5,
+	"UnsubscribeTopicAck": 6,
+	"HoldMic":             7,
+	"HoldMicAck":          8,
+	"ReleaseMic":          9,
+	"ReleaseMicAck":       10,
+	"Disconnect":          11,
+	"DisConnectAck":       12,
+	"Audio":               13,
+	"Ping":                14,
+	"Pong":                15,
 }
 
-func (x MsgID) String() string {
-	return proto.EnumName(MsgID_name, int32(x))
+func (x CMDID) String() string {
+	return proto.EnumName(CMDID_name, int32(x))
 }
 
-func (MsgID) EnumDescriptor() ([]byte, []int) {
+func (CMDID) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_d0f0a1b324c95b77, []int{0}
 }
 
 type Msg struct {
 	Version              int32      `protobuf:"zigzag32,1,opt,name=version,proto3" json:"version,omitempty"`
-	Mid                  MsgID      `protobuf:"varint,2,opt,name=mid,proto3,enum=msg.MsgID" json:"mid,omitempty"`
-	Uid                  uint32     `protobuf:"varint,3,opt,name=uid,proto3" json:"uid,omitempty"`
-	Tid                  uint32     `protobuf:"varint,4,opt,name=tid,proto3" json:"tid,omitempty"`
-	Command              *Command   `protobuf:"bytes,5,opt,name=command,proto3" json:"command,omitempty"`
+	Mid                  uint32     `protobuf:"varint,2,opt,name=mid,proto3" json:"mid,omitempty"`
+	CmdID                CMDID      `protobuf:"varint,3,opt,name=cmdID,proto3,enum=msg.CMDID" json:"cmdID,omitempty"`
+	Uid                  uint32     `protobuf:"varint,4,opt,name=uid,proto3" json:"uid,omitempty"`
+	Tid                  uint32     `protobuf:"varint,5,opt,name=tid,proto3" json:"tid,omitempty"`
 	AudioData            *AudioData `protobuf:"bytes,6,opt,name=audioData,proto3" json:"audioData,omitempty"`
 	AckCode              int32      `protobuf:"zigzag32,7,opt,name=ackCode,proto3" json:"ackCode,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
@@ -142,11 +142,18 @@ func (m *Msg) GetVersion() int32 {
 	return 0
 }
 
-func (m *Msg) GetMid() MsgID {
+func (m *Msg) GetMid() uint32 {
 	if m != nil {
 		return m.Mid
 	}
-	return MsgID_UNKNOWN
+	return 0
+}
+
+func (m *Msg) GetCmdID() CMDID {
+	if m != nil {
+		return m.CmdID
+	}
+	return CMDID_UNKNOWN
 }
 
 func (m *Msg) GetUid() uint32 {
@@ -163,13 +170,6 @@ func (m *Msg) GetTid() uint32 {
 	return 0
 }
 
-func (m *Msg) GetCommand() *Command {
-	if m != nil {
-		return m.Command
-	}
-	return nil
-}
-
 func (m *Msg) GetAudioData() *AudioData {
 	if m != nil {
 		return m.AudioData
@@ -183,45 +183,6 @@ func (m *Msg) GetAckCode() int32 {
 	}
 	return 0
 }
-
-type Command struct {
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *Command) Reset()         { *m = Command{} }
-func (m *Command) String() string { return proto.CompactTextString(m) }
-func (*Command) ProtoMessage()    {}
-func (*Command) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d0f0a1b324c95b77, []int{1}
-}
-func (m *Command) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *Command) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_Command.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *Command) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Command.Merge(m, src)
-}
-func (m *Command) XXX_Size() int {
-	return m.Size()
-}
-func (m *Command) XXX_DiscardUnknown() {
-	xxx_messageInfo_Command.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Command proto.InternalMessageInfo
 
 type AudioData struct {
 	Id                   int32    `protobuf:"zigzag32,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -237,7 +198,7 @@ func (m *AudioData) Reset()         { *m = AudioData{} }
 func (m *AudioData) String() string { return proto.CompactTextString(m) }
 func (*AudioData) ProtoMessage()    {}
 func (*AudioData) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d0f0a1b324c95b77, []int{2}
+	return fileDescriptor_d0f0a1b324c95b77, []int{1}
 }
 func (m *AudioData) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -295,43 +256,41 @@ func (m *AudioData) GetData() []byte {
 }
 
 func init() {
-	proto.RegisterEnum("msg.MsgID", MsgID_name, MsgID_value)
+	proto.RegisterEnum("msg.CMDID", CMDID_name, CMDID_value)
 	proto.RegisterType((*Msg)(nil), "msg.Msg")
-	proto.RegisterType((*Command)(nil), "msg.Command")
 	proto.RegisterType((*AudioData)(nil), "msg.AudioData")
 }
 
 func init() { proto.RegisterFile("msg/msg.proto", fileDescriptor_d0f0a1b324c95b77) }
 
 var fileDescriptor_d0f0a1b324c95b77 = []byte{
-	// 430 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x5c, 0x92, 0x5d, 0x8a, 0xdb, 0x30,
-	0x10, 0xc7, 0x57, 0x76, 0x12, 0xd7, 0x93, 0x2f, 0xed, 0x6c, 0x3f, 0x5c, 0x58, 0x42, 0xc8, 0x43,
-	0x09, 0xa5, 0x6c, 0x61, 0x7b, 0x82, 0x6d, 0xf4, 0x50, 0x53, 0x92, 0x16, 0xb5, 0x4b, 0x9f, 0x1d,
-	0x4b, 0x18, 0xb1, 0x6b, 0x2b, 0x44, 0x4a, 0xa1, 0x37, 0xe9, 0x2d, 0x7a, 0x8d, 0x3e, 0xb6, 0x37,
-	0x28, 0xe9, 0x45, 0x16, 0xc9, 0x76, 0xc2, 0xe6, 0x6d, 0xe6, 0xe7, 0xdf, 0x88, 0xff, 0x0c, 0x86,
-	0x61, 0x69, 0x8a, 0xb7, 0xa5, 0x29, 0xae, 0x36, 0x5b, 0x6d, 0x35, 0x86, 0xa5, 0x29, 0x66, 0x7f,
-	0x09, 0x84, 0x4b, 0x53, 0x60, 0x02, 0xd1, 0x77, 0xb9, 0x35, 0x4a, 0x57, 0x09, 0x99, 0x92, 0xf9,
-	0x39, 0x6f, 0x5b, 0xbc, 0x84, 0xb0, 0x54, 0x22, 0x09, 0xa6, 0x64, 0x3e, 0xba, 0x86, 0x2b, 0x37,
-	0xbf, 0x34, 0x45, 0xca, 0xb8, 0xc3, 0x48, 0x21, 0xdc, 0x29, 0x91, 0x84, 0x53, 0x32, 0x1f, 0x72,
-	0x57, 0x3a, 0x62, 0x95, 0x48, 0x3a, 0x35, 0xb1, 0x4a, 0xe0, 0x2b, 0x88, 0x72, 0x5d, 0x96, 0x59,
-	0x25, 0x92, 0xee, 0x94, 0xcc, 0xfb, 0xd7, 0x03, 0xff, 0xca, 0xa2, 0x66, 0xbc, 0xfd, 0x88, 0x6f,
-	0x20, 0xce, 0x76, 0x42, 0x69, 0x96, 0xd9, 0x2c, 0xe9, 0x79, 0x73, 0xe4, 0xcd, 0x9b, 0x96, 0xf2,
-	0xa3, 0xe0, 0x12, 0x67, 0xf9, 0xdd, 0x42, 0x0b, 0x99, 0x44, 0x75, 0xe2, 0xa6, 0x9d, 0xc5, 0x10,
-	0x35, 0x6f, 0xcf, 0x32, 0x88, 0x0f, 0xc3, 0x38, 0x82, 0x40, 0x89, 0x66, 0xbd, 0x40, 0x09, 0x44,
-	0xe8, 0xd8, 0xcd, 0x0f, 0xe9, 0x57, 0x3b, 0xe7, 0xbe, 0xc6, 0x4b, 0x88, 0xad, 0x2a, 0xa5, 0xb1,
-	0x59, 0xb9, 0xf1, 0x69, 0x3b, 0xfc, 0x08, 0xdc, 0x84, 0x68, 0xc3, 0x0d, 0xb8, 0xaf, 0x5f, 0xff,
-	0x0a, 0xa0, 0xeb, 0x0f, 0x82, 0x7d, 0x88, 0x6e, 0x57, 0x1f, 0x57, 0x9f, 0xbe, 0xad, 0xe8, 0x19,
-	0x0e, 0x21, 0x5e, 0xe8, 0xaa, 0x92, 0xb9, 0x4d, 0x19, 0x25, 0x48, 0x61, 0xd0, 0xb4, 0x37, 0xf9,
-	0x5d, 0xca, 0x68, 0x80, 0x4f, 0x81, 0x7e, 0xd9, 0xad, 0x4d, 0xbe, 0x55, 0x6b, 0xf9, 0x55, 0x6f,
-	0x54, 0x9e, 0x32, 0x1a, 0xe2, 0x0b, 0xb8, 0x78, 0x4c, 0x6b, 0xbd, 0x83, 0xcf, 0x01, 0x6f, 0x2b,
-	0x73, 0x3a, 0xd0, 0xc5, 0x97, 0xf0, 0xec, 0x94, 0xd7, 0x23, 0x3d, 0x17, 0xe1, 0x83, 0xbe, 0x17,
-	0x4b, 0x6f, 0x46, 0x2e, 0x82, 0x6f, 0xd3, 0x46, 0x78, 0xe2, 0x08, 0x97, 0xf7, 0x32, 0x33, 0xb2,
-	0x76, 0x62, 0xbc, 0x80, 0xf1, 0x91, 0xd4, 0x1a, 0x38, 0x8d, 0x29, 0x93, 0x1f, 0xb6, 0xe9, 0x3b,
-	0x8d, 0x29, 0xf3, 0x68, 0xa1, 0x01, 0x8e, 0xa1, 0x7f, 0xb8, 0x75, 0xca, 0xe8, 0x10, 0x01, 0x7a,
-	0x9f, 0x55, 0x55, 0xa4, 0x8c, 0x8e, 0x7c, 0xad, 0x7d, 0x3d, 0x7e, 0x4f, 0x7f, 0xef, 0x27, 0xe4,
-	0xcf, 0x7e, 0x42, 0xfe, 0xed, 0x27, 0xe4, 0xe7, 0xff, 0xc9, 0xd9, 0xba, 0xe7, 0xff, 0xc8, 0x77,
-	0x0f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x31, 0x92, 0x6f, 0x08, 0xa2, 0x02, 0x00, 0x00,
+	// 406 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x5c, 0x52, 0x4d, 0x6f, 0xd3, 0x40,
+	0x10, 0xed, 0xfa, 0x23, 0xa9, 0x27, 0x8d, 0xd9, 0x0c, 0x20, 0x7c, 0x40, 0x91, 0xd5, 0x53, 0x84,
+	0x50, 0x91, 0xca, 0x2f, 0x28, 0xf1, 0x81, 0x0a, 0x25, 0x20, 0x43, 0xc5, 0xd9, 0xf1, 0xae, 0xac,
+	0x51, 0x6b, 0x6f, 0x94, 0xdd, 0x20, 0xf1, 0x23, 0xb8, 0xf3, 0x6f, 0xb8, 0x72, 0xe4, 0x27, 0xa0,
+	0xf0, 0x47, 0xd0, 0x6c, 0x1c, 0x42, 0x7b, 0x7b, 0xef, 0xcd, 0x7b, 0x3b, 0x6f, 0x2c, 0xc3, 0xb8,
+	0xb5, 0xcd, 0xab, 0xd6, 0x36, 0x17, 0xeb, 0x8d, 0x71, 0x06, 0xc3, 0xd6, 0x36, 0xe7, 0x3f, 0x04,
+	0x84, 0x0b, 0xdb, 0x60, 0x06, 0xc3, 0x2f, 0x7a, 0x63, 0xc9, 0x74, 0x99, 0xc8, 0xc5, 0x6c, 0x52,
+	0x1e, 0x28, 0x4a, 0x08, 0x5b, 0x52, 0x59, 0x90, 0x8b, 0xd9, 0xb8, 0x64, 0x88, 0x39, 0xc4, 0x75,
+	0xab, 0xae, 0x8b, 0x2c, 0xcc, 0xc5, 0x2c, 0xbd, 0x84, 0x0b, 0x7e, 0x73, 0xbe, 0x28, 0xae, 0x8b,
+	0x72, 0x3f, 0xe0, 0xcc, 0x96, 0x54, 0x16, 0xed, 0x33, 0x5b, 0x52, 0xac, 0x38, 0x52, 0x59, 0xbc,
+	0x57, 0x1c, 0x29, 0x7c, 0x09, 0x49, 0xb5, 0x55, 0x64, 0x8a, 0xca, 0x55, 0xd9, 0x20, 0x17, 0xb3,
+	0xd1, 0x65, 0xea, 0x5f, 0xba, 0x3a, 0xa8, 0xe5, 0xd1, 0xc0, 0xfd, 0xaa, 0xfa, 0x76, 0x6e, 0x94,
+	0xce, 0x86, 0xfb, 0x7e, 0x3d, 0x3d, 0xaf, 0x20, 0xf9, 0x97, 0xc0, 0x14, 0x02, 0x52, 0xfd, 0x05,
+	0x01, 0x29, 0x44, 0x88, 0xdc, 0xfa, 0xab, 0xf6, 0xed, 0x27, 0xa5, 0xc7, 0xf8, 0x1c, 0x12, 0x47,
+	0xad, 0xb6, 0xae, 0x6a, 0xd7, 0xbe, 0x50, 0x54, 0x1e, 0x05, 0x4e, 0xa8, 0x43, 0xa3, 0xb3, 0xd2,
+	0xe3, 0x17, 0xdf, 0x02, 0x88, 0xfd, 0x7d, 0x38, 0x82, 0xe1, 0xcd, 0xf2, 0xdd, 0xf2, 0xfd, 0xe7,
+	0xa5, 0x3c, 0x61, 0x32, 0x37, 0x5d, 0xa7, 0x6b, 0x27, 0x05, 0xa6, 0x00, 0x3d, 0xb9, 0xaa, 0x6f,
+	0x65, 0x80, 0x08, 0xe9, 0xc7, 0xed, 0xca, 0xd6, 0x1b, 0x5a, 0xe9, 0x4f, 0x66, 0x4d, 0xb5, 0x0c,
+	0xf1, 0x29, 0x4c, 0xee, 0x6b, 0x6c, 0x8d, 0xf0, 0x09, 0xc8, 0x9b, 0xce, 0xde, 0x37, 0xc7, 0xf8,
+	0x0c, 0x1e, 0x3f, 0x54, 0xd9, 0x3e, 0xe0, 0xb5, 0x6f, 0xcd, 0x9d, 0x5a, 0x50, 0x2d, 0x87, 0xbc,
+	0xb6, 0x27, 0x3c, 0x3c, 0x65, 0x5e, 0xea, 0x3b, 0x5d, 0x59, 0xcd, 0xf3, 0x04, 0x27, 0x30, 0x3e,
+	0x72, 0xb6, 0x00, 0x5b, 0x0a, 0xb2, 0x75, 0xdf, 0x7c, 0xc4, 0x96, 0x82, 0xec, 0x7f, 0xe5, 0xcf,
+	0x30, 0x81, 0xd8, 0x7f, 0x53, 0x39, 0xc6, 0x53, 0x88, 0x3e, 0x50, 0xd7, 0xc8, 0xd4, 0x23, 0xd3,
+	0x35, 0xf2, 0xd1, 0x1b, 0xf9, 0x73, 0x37, 0x15, 0xbf, 0x76, 0x53, 0xf1, 0x7b, 0x37, 0x15, 0xdf,
+	0xff, 0x4c, 0x4f, 0x56, 0x03, 0xff, 0x4b, 0xbd, 0xfe, 0x1b, 0x00, 0x00, 0xff, 0xff, 0xe6, 0xf9,
+	0x0a, 0x2f, 0x63, 0x02, 0x00, 0x00,
 }
 
 func (m *Msg) Marshal() (dAtA []byte, err error) {
@@ -375,25 +334,18 @@ func (m *Msg) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x32
 	}
-	if m.Command != nil {
-		{
-			size, err := m.Command.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintMsg(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x2a
-	}
 	if m.Tid != 0 {
 		i = encodeVarintMsg(dAtA, i, uint64(m.Tid))
 		i--
-		dAtA[i] = 0x20
+		dAtA[i] = 0x28
 	}
 	if m.Uid != 0 {
 		i = encodeVarintMsg(dAtA, i, uint64(m.Uid))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.CmdID != 0 {
+		i = encodeVarintMsg(dAtA, i, uint64(m.CmdID))
 		i--
 		dAtA[i] = 0x18
 	}
@@ -406,33 +358,6 @@ func (m *Msg) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i = encodeVarintMsg(dAtA, i, uint64((uint32(m.Version)<<1)^uint32((m.Version>>31))))
 		i--
 		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *Command) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *Command) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *Command) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.XXX_unrecognized != nil {
-		i -= len(m.XXX_unrecognized)
-		copy(dAtA[i:], m.XXX_unrecognized)
 	}
 	return len(dAtA) - i, nil
 }
@@ -509,15 +434,14 @@ func (m *Msg) Size() (n int) {
 	if m.Mid != 0 {
 		n += 1 + sovMsg(uint64(m.Mid))
 	}
+	if m.CmdID != 0 {
+		n += 1 + sovMsg(uint64(m.CmdID))
+	}
 	if m.Uid != 0 {
 		n += 1 + sovMsg(uint64(m.Uid))
 	}
 	if m.Tid != 0 {
 		n += 1 + sovMsg(uint64(m.Tid))
-	}
-	if m.Command != nil {
-		l = m.Command.Size()
-		n += 1 + l + sovMsg(uint64(l))
 	}
 	if m.AudioData != nil {
 		l = m.AudioData.Size()
@@ -526,18 +450,6 @@ func (m *Msg) Size() (n int) {
 	if m.AckCode != 0 {
 		n += 1 + sozMsg(uint64(m.AckCode))
 	}
-	if m.XXX_unrecognized != nil {
-		n += len(m.XXX_unrecognized)
-	}
-	return n
-}
-
-func (m *Command) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
 	}
@@ -639,12 +551,31 @@ func (m *Msg) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Mid |= MsgID(b&0x7F) << shift
+				m.Mid |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
 		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CmdID", wireType)
+			}
+			m.CmdID = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMsg
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.CmdID |= CMDID(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Uid", wireType)
 			}
@@ -663,7 +594,7 @@ func (m *Msg) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 4:
+		case 5:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Tid", wireType)
 			}
@@ -682,42 +613,6 @@ func (m *Msg) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 5:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Command", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMsg
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthMsg
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.Command == nil {
-				m.Command = &Command{}
-			}
-			if err := m.Command.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
 		case 6:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field AudioData", wireType)
@@ -775,60 +670,6 @@ func (m *Msg) Unmarshal(dAtA []byte) error {
 			}
 			v = int32((uint32(v) >> 1) ^ uint32(((v&1)<<31)>>31))
 			m.AckCode = v
-		default:
-			iNdEx = preIndex
-			skippy, err := skipMsg(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthMsg
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *Command) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowMsg
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: Command: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: Command: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
 		default:
 			iNdEx = preIndex
 			skippy, err := skipMsg(dAtA[iNdEx:])

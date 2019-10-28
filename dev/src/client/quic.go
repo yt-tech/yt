@@ -1,14 +1,11 @@
 package client
 
 import (
+	"context"
+	"time"
+
 	"github.com/lucas-clemente/quic-go"
 )
-
-type clientInfo struct {
-	uid     uint32
-	tid     uint32
-	session quic.Session
-}
 
 func (c *clientInfo) openQuic() {
 	tlsConf := settingQuic()
@@ -17,6 +14,21 @@ func (c *clientInfo) openQuic() {
 		mlog.Println(err)
 	}
 	c.session = session
+
+	go func() {
+		rcev, err := session.AcceptUniStream(context.Background())
+		if err != nil {
+			mlog.Println(err)
+		}
+		ba := make([]byte, 1024)
+		for {
+			n, err := rcev.Read(ba)
+			mlog.Println(string(ba[:n]), err)
+		}
+	}()
+	time.Sleep(1e8)
+	quicStream, _ := session.OpenStream()
+	c.quicStream = quicStream
 	// quicStream, err = session.OpenStream()
 	// if err != nil {
 	// 	mlog.Println(err)

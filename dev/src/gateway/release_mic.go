@@ -13,13 +13,13 @@ func (g *gateway) releaseMic(rpcsess tp.Session, message *msg.Msg) ([]byte, erro
 	tid := message.GetTid()
 	newHoldMic(uid, tid, &result)
 	if result > 99 {
-		return send2cliPack(message, msg.MsgID_ReleaseMicAckID, result)
+		return send2cliPack(message, msg.CMDID_ReleaseMicAck, result)
 	}
 	if rerr := rpcsess.Call("/manager/releasemic", message, &result).Rerror(); rerr != nil {
 		mlog.Println(rerr.String())
 		result = 500
 	}
-	return send2cliPack(message, msg.MsgID_ReleaseMicAckID, result)
+	return send2cliPack(message, msg.CMDID_ReleaseMicAck, result)
 }
 
 func newReleaseMic(uid, tid uint32, r int32) int32 {

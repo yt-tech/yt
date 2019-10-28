@@ -5,14 +5,14 @@ func userConnect() {
 	// outDataChannel <- data
 }
 
-func userDisconnect() {
-	data, err := packConnectData()
-	if err != nil {
-		mlog.Println(err)
-		return
-	}
-	outDataChannel <- data
-}
+// func userDisconnect() {
+// 	data, err := packConnectData()
+// 	if err != nil {
+// 		mlog.Println(err)
+// 		return
+// 	}
+// 	outDataChannel <- data
+// }
 
 func subscribeTopic() {
 

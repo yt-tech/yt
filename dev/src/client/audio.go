@@ -8,7 +8,7 @@ import (
 
 func packAudioData() ([]byte, error) {
 	cm := &msg.Msg{
-		Mid: msg.MsgID_AudioDataID,
+		CmdID: msg.CMDID_Audio,
 		AudioData: &msg.AudioData{
 			Id:   24,
 			Data: []byte("---11111---"),

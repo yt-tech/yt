@@ -18,7 +18,7 @@ func (y *ytClientInfo) subscribeTopic(message *msg.Msg) ([]byte, error) {
 	uid := message.GetUid()
 	tid := message.GetTid()
 	result = y.preStorageTopicBroadcastStream(uid, tid, result)
-	buff, err := send2cliPack(message, msg.MsgID_SubscribeTopicAckID, result)
+	buff, err := send2cliPack(message, msg.CMDID_SubscribeTopicAck, result)
 	if err != nil {
 		mlog.Println(err)
 		return nil, err
@@ -33,14 +33,12 @@ func (y *ytClientInfo) subscribeTopic(message *msg.Msg) ([]byte, error) {
 func (y *ytClientInfo) preStorageTopicBroadcastStream(uid, tid uint32, r int32) int32 {
 
 	topicer, isExist := localTopicBroadcast.Load(tid)
-	mlog.Println(tid, isExist, "|||||||||||||")
 	if !isExist {
 		newTopic := &usersOfTopic{
 			users: make(map[uint32]quic.Stream, 10),
 		}
 		newTopic.users[uid] = y.quicStream
 		localTopicBroadcast.Store(tid, newTopic)
-		mlog.Println(tid, isExist, "|||||||||---------||||", newTopic)
 		return 12
 	}
 	topic, ok := topicer.(*usersOfTopic)

@@ -1,49 +1,46 @@
 package client
 
 import (
+	"time"
 	"yt/ytproto/msg"
 
 	ggproto "github.com/gogo/protobuf/proto"
 )
 
-func packConnectData() ([]byte, error) {
+func (c *clientInfo) packConnectData(mid uint32) ([]byte, error) {
 	cm := &msg.Msg{
-		Mid: msg.MsgID_ConnectID,
-		Uid: 222,
+		Mid:   mid,
+		CmdID: msg.CMDID_Connect,
+		Uid:   c.uid,
 	}
 	return ggproto.Marshal(cm)
 }
 
-// func packLeaveGroupData() ([]byte, error) {
-// 	lr := &ytproto.ActionRequest{
-// 		ActionID: 5,
-// 		Uid:      3,
-// 		Gid:      10,
-// 	}
-// 	return ggproto.Marshal(lr)
-// }
-// func packHoldMicData() ([]byte, error) {
-// 	lr := &ytproto.ActionRequest{
-// 		ActionID: 7,
-// 		Uid:      3,
-// 		Gid:      10,
-// 	}
-// 	return ggproto.Marshal(lr)
-// }
-// func packReleaseMicData() ([]byte, error) {
-// 	lr := &ytproto.ActionRequest{
-// 		ActionID: 9,
-// 		Uid:      3,
-// 		Gid:      10,
-// 	}
-// 	return ggproto.Marshal(lr)
-// }
-
-// func packDisconnectData() ([]byte, error) {
-// 	lr := &ytproto.ActionRequest{
-// 		ActionID: 11,
-// 		Uid:      3,
-// 		Gid:      10,
-// 	}
-// 	return ggproto.Marshal(lr)
-// }
+func (c *clientInfo) connect() error {
+	mid := getRangNumber()
+	data, err := c.packConnectData(mid)
+	if err != nil {
+		mlog.Println(err)
+		return err
+	}
+	c.quicStream.Write(data)
+	c.quicStream.SetReadDeadline(time.Now().Add(3e9))
+	bf := make([]byte, 1024)
+	n, err := c.quicStream.Read(bf)
+	if err == nil {
+		cm := &msg.Msg{}
+		err = ggproto.Unmarshal(bf[:n], cm)
+		if err != nil {
+			mlog.Println(err)
+		}
+		if cm.Mid == mid {
+			mlog.Println(cm)
+		} else {
+			mlog.Println("timeout data")
+			ne, err := c.quicStream.Read(bf)
+			mlog.Println(string(bf[:ne]), err)
+		}
+	}
+	mlog.Println(err)
+	return err
+}

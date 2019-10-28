@@ -7,10 +7,10 @@ import (
 	ggproto "github.com/gogo/protobuf/proto"
 )
 
-func (c *clientInfo) packSubscribeTopic(mid uint32) ([]byte, error) {
+func (c *clientInfo) packUnsubscribeTopic(mid uint32) ([]byte, error) {
 	cm := &msg.Msg{
 		Mid:   mid,
-		CmdID: msg.CMDID_SubscribeTopic,
+		CmdID: msg.CMDID_UnsubscribeTopic,
 		Uid:   c.uid,
 		Tid:   c.tid,
 	}
@@ -18,9 +18,9 @@ func (c *clientInfo) packSubscribeTopic(mid uint32) ([]byte, error) {
 	return ggproto.Marshal(cm)
 }
 
-func (c *clientInfo) subscribeTopic() error {
+func (c *clientInfo) unsubscribeTopic() error {
 	mid := getRangNumber()
-	data, err := c.packSubscribeTopic(mid)
+	data, err := c.packUnsubscribeTopic(mid)
 	if err != nil {
 		mlog.Println(err)
 		return err

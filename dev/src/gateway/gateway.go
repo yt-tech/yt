@@ -14,8 +14,8 @@ var clientsMap sync.Map
 
 type gateway struct{}
 
-func send2cliPack(message *msg.Msg, mid msg.MsgID, result int32) ([]byte, error) {
-	message.Mid = mid
+func send2cliPack(message *msg.Msg, cid msg.CMDID, result int32) ([]byte, error) {
+	message.CmdID = cid
 	message.AckCode = result
 	bf, err := message.Marshal()
 	if err != nil {

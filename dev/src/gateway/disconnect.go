@@ -21,7 +21,7 @@ func (g *gateway) disconnectRequest(rpcsess tp.Session, sess quic.Session, strea
 		return err
 	}
 	mlog.Println("broadcastWriteStream ID", broadcastStream.StreamID())
-	buff, err := send2cliPack(message, msg.MsgID_DisConnectAckID, result)
+	buff, err := send2cliPack(message, msg.CMDID_DisConnectAck, result)
 	if err != nil {
 		mlog.Println(err)
 		return err

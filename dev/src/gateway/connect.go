@@ -12,7 +12,7 @@ func (y *ytClientInfo) connectRequest(message *msg.Msg) ([]byte, error) {
 		mlog.Println(rerr)
 		return nil, rerr.ToError()
 	}
-	buff, err := send2cliPack(message, msg.MsgID_ConnectAckID, result)
+	buff, err := send2cliPack(message, msg.CMDID_ConnectAck, result)
 	if err != nil {
 		mlog.Println(err)
 		return nil, err

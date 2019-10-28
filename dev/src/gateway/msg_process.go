@@ -28,7 +28,21 @@ func (y *ytClientInfo) process() {
 	if err != nil {
 		mlog.Println(err)
 	}
-
+	// go func() {
+	// 	tike := time.NewTicker(10e9)
+	// 	cm := &msg.Msg{
+	// 		Mid:   88,
+	// 		CmdID: msg.CMDID_Ping,
+	// 		Uid:   8,
+	// 	}
+	// 	pingBytes, _ := ggproto.Marshal(cm)
+	// 	for {
+	// 		select {
+	// 		case <-tike.C:
+	// 			y.broadcastStream.Write(pingBytes)
+	// 		}
+	// 	}
+	// }()
 	for {
 		y.quicStream, err = y.quicSession.AcceptStream(context.Background())
 		if err != nil {
@@ -55,9 +69,9 @@ func (y *ytClientInfo) process() {
 				break
 			}
 
-			mlog.Println(message)
-			switch message.GetMid() {
-			case msg.MsgID_ConnectID:
+			switch message.GetCmdID() {
+			case msg.CMDID_Connect:
+				mlog.Println("connect")
 				buff, err = y.connectRequest(message)
 				if err != nil {
 					mlog.Println("sess close")
@@ -66,21 +80,27 @@ func (y *ytClientInfo) process() {
 				}
 				y.quicStream.Write(buff)
 				// clientsMap.LoadOrStore(y.quicSession.RemoteAddr().String(), uid)
-			case msg.MsgID_SubscribeTopicID:
+			case msg.CMDID_SubscribeTopic:
+				mlog.Println("SubscribeTopic")
 				if buff, err = y.subscribeTopic(message); err != nil {
 					break
 				}
 				y.quicStream.Write(buff)
-			case msg.MsgID_UnsubscribeTopicID:
-			case msg.MsgID_HoldMicID:
+			case msg.CMDID_UnsubscribeTopic:
+				mlog.Println("UnSubscribeTopic")
+			case msg.CMDID_HoldMic:
+				mlog.Println("holdMIc")
 				if buff, err = y.holdMic(message); err != nil {
 					break
 				}
 				y.quicStream.Write(buff)
-			case msg.MsgID_ReleaseMicID:
-			case msg.MsgID_DisconnectID:
-			case msg.MsgID_AudioDataID:
+			case msg.CMDID_ReleaseMic:
+			case msg.CMDID_Disconnect:
+			case msg.CMDID_Audio:
+				mlog.Println("audio data")
 				y.audioReceive(message)
+			case msg.CMDID_Ping:
+				mlog.Println(message)
 			default:
 				mlog.Println("--------")
 				break
