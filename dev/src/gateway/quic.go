@@ -46,10 +46,7 @@ func quicServer() {
 			newClientSession.Close()
 			break
 		}
-		var ytCli = new(ytClientInfo)
-		ytCli.quicSession = newClientSession
-		ytCli.tpSession = rpcsess
-		go ytCli.process()
+		go process(newClientSession, rpcsess)
 	}
 }
 

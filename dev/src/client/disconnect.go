@@ -7,21 +7,18 @@ import (
 	ggproto "github.com/gogo/protobuf/proto"
 )
 
-func (c *clientInfo) packSubscribeTopic(mid uint32) ([]byte, error) {
+func (c *clientInfo) packDisconnectData(mid uint32) ([]byte, error) {
 	cm := &msg.Msg{
 		Mid:   mid,
-		CmdID: msg.CMDID_SubscribeTopic,
+		CmdID: msg.CMDID_Disconnect,
 		Uid:   c.uid,
-		Tid:   c.tid,
 	}
-
 	return ggproto.Marshal(cm)
 }
 
-func (c *clientInfo) subscribeTopic() error {
+func (c *clientInfo) disconnect() error {
 	mid := getRangNumber()
-	mlog.Println(mid)
-	data, err := c.packSubscribeTopic(mid)
+	data, err := c.packDisconnectData(mid)
 	if err != nil {
 		mlog.Println(err)
 		return err
@@ -39,9 +36,9 @@ func (c *clientInfo) subscribeTopic() error {
 		if cm.Mid == mid {
 			mlog.Println(cm)
 		} else {
-			mlog.Println("timeout data", cm.Mid, mid)
+			mlog.Println("timeout data")
 			ne, err := c.quicStream.Read(bf)
-			mlog.Println(bf[:ne], err)
+			mlog.Println(string(bf[:ne]), err)
 			cm := &msg.Msg{}
 			err = ggproto.Unmarshal(bf[:n], cm)
 			if err != nil {

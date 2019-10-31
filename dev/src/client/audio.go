@@ -6,9 +6,11 @@ import (
 	ggproto "github.com/gogo/protobuf/proto"
 )
 
-func packAudioData() ([]byte, error) {
+func (c *clientInfo) packAudioData() ([]byte, error) {
 	cm := &msg.Msg{
 		CmdID: msg.CMDID_Audio,
+		Uid:   c.uid,
+		Tid:   c.tid,
 		AudioData: &msg.AudioData{
 			Id:   24,
 			Data: []byte("---11111---"),

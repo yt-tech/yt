@@ -32,7 +32,7 @@ func StartPush() {
 	buff := make([]byte, 1024)
 	for {
 		n, raddr, _ := conn.ReadFromUDP(buff)
-		mlog.Println(buff[:n])
-		conn.WriteToUDP(buff[:n], raddr)
+		_, err = conn.WriteToUDP(buff[:n], raddr)
+		mlog.Println(buff[:n], err)
 	}
 }

@@ -2,6 +2,7 @@ package client
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -19,14 +20,14 @@ var outDataChannel = make(chan []byte, 100)
 
 //Start ..
 func Start() {
-	cli := newClient(2, 1)
+	cli := newClient(4, 1)
 	// gatewayAddr = getDisp()
 	mlog.Println(gatewayAddr)
 	cli.openQuic()
 	// time.Sleep(1e9)
 	// logger.Debug("start zap log")
 	go func() {
-		tike := time.NewTicker(10e9)
+		tike := time.NewTicker(20e9)
 		cm := &msg.Msg{
 			CmdID: msg.CMDID_Ping,
 			Uid:   9,
@@ -57,11 +58,23 @@ func Start() {
 		if c1 {
 			switch {
 			case a == "1":
+				go func() {
+					recv, _ := cli.session.AcceptUniStream(context.Background())
+					ba := make([]byte, 1024)
+					for {
+						n, err := recv.Read(ba)
+						if err != nil {
+							os.Exit(10)
+						}
+						mlog.Println(ba[:n], err)
+					}
+				}()
 				fmt.Println("connect")
 				err = cli.connect()
 				if err != nil {
 					mlog.Println(err)
 				}
+
 			case a == "2":
 				fmt.Println("sub")
 				err = cli.subscribeTopic()
@@ -75,8 +88,8 @@ func Start() {
 					mlog.Println(err)
 				}
 				go func() {
-					for it := 0; it < 10; it++ {
-						data, err := packAudioData()
+					for it := 0; it < 2; it++ {
+						data, err := cli.packAudioData()
 						if err != nil {
 							mlog.Println(err)
 							return
@@ -86,9 +99,13 @@ func Start() {
 					}
 				}()
 			case a == "4":
-				fmt.Println("release")
+				fmt.Println("release mic")
 			case a == "5":
 				fmt.Println("unsub")
+				err = cli.unsubscribeTopic()
+				if err != nil {
+					mlog.Println(err)
+				}
 			case a == "6":
 				fmt.Println("disconnect")
 			}

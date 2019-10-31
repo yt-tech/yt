@@ -8,7 +8,7 @@ import (
 
 //Subscribetopic ..
 func (m *Manager) releasemic(ytmsg *msg.Msg) (result int32, terr *tp.Rerror) {
-	mlog.Println("hold mic")
+	mlog.Println("release mic")
 	uid := ytmsg.GetUid()
 	tid := ytmsg.GetTid()
 	topicer, isEsixt := topics.Load(tid)

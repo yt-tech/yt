@@ -40,7 +40,7 @@ func (c *clientInfo) holdMic() error {
 		} else {
 			mlog.Println("timeout data")
 			ne, err := c.quicStream.Read(bf)
-			mlog.Println(string(bf[:ne]), err)
+			mlog.Println(bf[:ne], err)
 		}
 	}
 	mlog.Println(err)

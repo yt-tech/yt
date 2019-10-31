@@ -39,6 +39,12 @@ func (c *clientInfo) connect() error {
 			mlog.Println("timeout data")
 			ne, err := c.quicStream.Read(bf)
 			mlog.Println(string(bf[:ne]), err)
+			cm := &msg.Msg{}
+			err = ggproto.Unmarshal(bf[:n], cm)
+			if err != nil {
+				mlog.Println(err)
+			}
+			mlog.Println(cm)
 		}
 	}
 	mlog.Println(err)

@@ -31,9 +31,12 @@ func audioListen() {
 		if err != nil {
 			mlog.Println(err, n)
 		}
-		mlog.Println(buff[:n], string(buff[:n]))
+		mlog.Println(buff[:n])
 		var mm = new(msg.Msg)
-		ggproto.Unmarshal(buff[:n], mm)
+		err = ggproto.Unmarshal(buff[:n], mm)
+		if err != nil {
+			mlog.Println(err)
+		}
 		broadcastAudio(mm)
 	}
 }

@@ -1,9 +1,25 @@
 package gateway
 
 import (
+	"context"
 	"yt/ytproto/msg"
 )
 
+func (y *ytClientInfo) newConnect(message *msg.Msg) error {
+	buff, err := y.connectRequest(message)
+	if err != nil {
+		mlog.Println("sess close")
+		y.quicSession.Close()
+		return err
+	}
+	y.createClientBroadcastStream()
+	_, err = y.commandStream.Write(buff)
+	if err != nil {
+		mlog.Println(err)
+		return err
+	}
+	return nil
+}
 func (y *ytClientInfo) connectRequest(message *msg.Msg) ([]byte, error) {
 	mlog.Println("ConnectRequest----------------------->>>>>")
 	var result int32
@@ -17,20 +33,22 @@ func (y *ytClientInfo) connectRequest(message *msg.Msg) ([]byte, error) {
 		mlog.Println(err)
 		return nil, err
 	}
-	_, err = y.quicStream.Write(buff)
+	_, err = y.commandStream.Write(buff)
 	if err != nil {
 		mlog.Println(err)
 		return nil, err
 	}
 	return buff, nil
 }
-
-// func connectAckBytes(message *msg.Msg, r int32) ([]byte, error) {
-// 	message.Mid = msg.MsgID_ConnectAckID
-// 	message.Command.ConnectAck.Result = r
-// 	bf, err := message.Marshal()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return bf, nil
-// }
+func (y *ytClientInfo) createClientBroadcastStream() {
+	var err error
+	y.broadcastStream, err = y.quicSession.OpenUniStreamSync(context.Background())
+	if err != nil {
+		mlog.Println(err)
+	}
+	_, err = y.broadcastStream.Write([]byte("create broadcast success"))
+	if err != nil {
+		mlog.Println(err)
+	}
+	mlog.Printf("uid=%d broadcastStream streamID=%d\n", y.uid, y.broadcastStream.StreamID())
+}

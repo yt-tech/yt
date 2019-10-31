@@ -4,18 +4,18 @@ import (
 	"sync"
 	"yt/ytproto/msg"
 
-	"github.com/lucas-clemente/quic-go"
-
 	tp "github.com/henrylee2cn/teleport"
+	"github.com/lucas-clemente/quic-go"
 )
 
 //Broadcast ..
 type Broadcast struct {
 	tp.PushCtx
 }
+
 type usersOfTopic struct {
 	sync.RWMutex
-	users  map[uint32]quic.Stream
+	users  map[uint32]quic.SendStream
 	holder uint32
 }
 
@@ -27,7 +27,6 @@ func (b *Broadcast) Push(bmsg *msg.Msg) *tp.Rerror {
 	buff, err := bmsg.Marshal()
 	if err != nil {
 		localBroadcastPush(uid, tid, buff)
-
 	}
 	mlog.Println(err)
 	return nil
@@ -38,13 +37,16 @@ func localBroadcastPush(uid, tid uint32, buff []byte) {
 		mlog.Println("broadcast topic is not exist")
 	}
 	topic, ok := userser.(*usersOfTopic)
+	mlog.Println(topic)
 	if !ok {
 		mlog.Println("no ok")
 	}
 	topic.RLock()
 	for id, sendStream := range topic.users {
+		mlog.Printf("uid=%d broadcast streamID=%d\n", id, sendStream.StreamID())
 		if id != uid {
-			sendStream.Write(buff)
+			_, err := sendStream.Write(buff)
+			mlog.Println(err)
 		}
 	}
 	topic.RUnlock()

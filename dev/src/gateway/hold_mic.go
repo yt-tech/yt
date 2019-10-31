@@ -7,13 +7,14 @@ import (
 func (y *ytClientInfo) holdMic(message *msg.Msg) ([]byte, error) {
 	mlog.Println("hold mic")
 	var result int32
+	mid := message.GetMid()
 	uid := message.GetUid()
 	tid := message.GetTid()
 	newHoldMic(uid, tid, &result)
 	if result > 20 {
+		mlog.Printf("mid=%d uid=%d hold mic in tid=%d result=%d\n", mid, uid, tid, result)
 		return send2cliPack(message, msg.CMDID_HoldMicAck, result)
 	}
-	mlog.Printf("uid=%d hold mic in tid=%d result=%d\n", uid, tid, result)
 	if rerr := y.tpSession.Call("/manager/holdmic", message, &result).Rerror(); rerr != nil {
 		mlog.Println(rerr.String())
 		result = 100
@@ -23,10 +24,13 @@ func (y *ytClientInfo) holdMic(message *msg.Msg) ([]byte, error) {
 		if err == nil {
 			mlog.Println("broadcast holdmic")
 			localBroadcastPush(uid, tid, buff) //广播给当前网关的其他客户端端
+			mlog.Printf("mid=%d uid=%d hold mic in tid=%d result=%d\n", mid, uid, tid, result)
 			return buff, nil
 		}
+		mlog.Printf("mid=%d uid=%d hold mic in tid=%d result=%d\n", mid, uid, tid, result)
 		return nil, err
 	}
+	mlog.Printf("mid=%d uid=%d hold mic in tid=%d result=%d\n", mid, uid, tid, result)
 	return send2cliPack(message, msg.CMDID_HoldMicAck, result)
 }
 

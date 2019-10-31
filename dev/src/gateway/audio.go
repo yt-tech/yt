@@ -19,14 +19,17 @@ func broadcastAudio(m *msg.Msg) {
 	tid := m.GetTid()
 	tstreamer, isExist := localTopicBroadcast.Load(tid)
 	if !isExist {
-		mlog.Println(tid, "is not exist")
+		mlog.Printf("tid=%d is not exist", tid)
 		return
 	}
 	buff, _ := m.Marshal()
 	ts := tstreamer.(*usersOfTopic)
 	ts.RLock()
 	for _, v := range ts.users {
-		v.Write(buff)
+		_, err := v.Write(buff)
+		if err != nil {
+			mlog.Println(err)
+		}
 	}
 	ts.RUnlock()
 }
