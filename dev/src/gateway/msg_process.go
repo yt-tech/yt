@@ -36,7 +36,6 @@ func process(quicSession quic.Session, tpSession tp.Session) {
 		return
 	}
 	readBuff := make([]byte, 1024)
-	var buff []byte
 	var message = &msg.Msg{}
 	for {
 		n, err := y.commandStream.Read(readBuff)
@@ -54,24 +53,30 @@ func process(quicSession quic.Session, tpSession tp.Session) {
 		y.uid = message.GetUid()
 		switch message.GetCmdID() {
 		case msg.CMDID_Connect:
-			if err = y.newConnect(message); err == nil {
-				mlog.Printf("uid=%d connect remoteAddr=%s commandstreamID=%d success\n", y.uid, quicSession.RemoteAddr().String(), y.commandStream.StreamID())
+			if err = y.newConnect(message); err != nil {
+				mlog.Printf("error=%v uid=%d connect remoteAddr=%s commandstreamID=%d\n", err, y.uid, quicSession.RemoteAddr().String(), y.commandStream.StreamID())
 			}
+			mlog.Printf("uid=%d connect remoteAddr=%s commandstreamID=%d success\n", y.uid, quicSession.RemoteAddr().String(), y.commandStream.StreamID())
 		case msg.CMDID_SubscribeTopic:
-			if err = y.newSubscribeTopic(message); err == nil {
-				mlog.Printf("uid=%d tid=%d subscribeTopic success\n", y.uid, message.GetTid())
+			if err = y.newSubscribeTopic(message); err != nil {
+				mlog.Printf("error=%v uid=%d tid=%d subscribeTopic\n", err, y.uid, message.GetTid())
 			}
+			mlog.Printf("uid=%d tid=%d subscribeTopic success\n", y.uid, message.GetTid())
 		case msg.CMDID_UnsubscribeTopic:
 			if err = y.newUnsubscribeTopic(message); err == nil {
-				mlog.Printf("uid=%d tid=%d unSubscribeTopic success\n", y.uid, message.GetTid())
+				mlog.Printf("error=%v uid=%d tid=%d unSubscribeTopic \n", err, y.uid, message.GetTid())
 			}
+			mlog.Printf("uid=%d tid=%d unSubscribeTopic success\n", y.uid, message.GetTid())
 		case msg.CMDID_HoldMic:
-			mlog.Println(message)
-			if buff, err = y.holdMic(message); err != nil {
-				break
+			if err = y.newHoldMic(message); err != nil {
+				mlog.Printf("error=%v uid=%d tid=%d holdMic\n", err, y.uid, message.GetTid())
 			}
-			y.commandStream.Write(buff)
+			mlog.Printf("uid=%d tid=%d holdMic success\n", y.uid, message.GetTid())
 		case msg.CMDID_ReleaseMic:
+			if err = y.newReleaseMic(message); err != nil {
+				mlog.Printf("error=%v uid=%d tid=%d releaseMic\n", err, y.uid, message.GetTid())
+			}
+			mlog.Printf("uid=%d tid=%d releaseMic success\n", y.uid, message.GetTid())
 		case msg.CMDID_Disconnect:
 		case msg.CMDID_Audio:
 			mlog.Println("audio data")

@@ -34,7 +34,7 @@ func (y *ytClientInfo) unsubscribeTopic(message *msg.Msg) ([]byte, error) {
 		mlog.Println(err)
 		return nil, err
 	}
-	localBroadcastPush(y.uid, tid, buff)
+	clientDistribute(y.uid, tid, buff)
 	y.deleteBroadcastStream(tid, result)
 	return buff, nil
 }

@@ -3,6 +3,8 @@ package gateway
 import (
 	"sync"
 	"yt/ytproto/msg"
+
+	"github.com/lucas-clemente/quic-go"
 )
 
 const gatewayID = uint32(1)
@@ -13,6 +15,12 @@ var localTopicBroadcast sync.Map //tid-*usersOfTopic
 var clientsMap sync.Map
 
 type gateway struct{}
+
+type usersOfTopic struct {
+	sync.RWMutex
+	users  map[uint32]quic.SendStream
+	holder uint32
+}
 
 func send2cliPack(message *msg.Msg, cid msg.CMDID, result int32) ([]byte, error) {
 	message.CmdID = cid

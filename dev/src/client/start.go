@@ -87,19 +87,13 @@ func Start() {
 				if err != nil {
 					mlog.Println(err)
 				}
-				go func() {
-					for it := 0; it < 2; it++ {
-						data, err := cli.packAudioData()
-						if err != nil {
-							mlog.Println(err)
-							return
-						}
-						cli.quicStream.Write(data)
-						time.Sleep(12e7)
-					}
-				}()
+
 			case a == "4":
 				fmt.Println("release mic")
+				err = cli.releaseMic()
+				if err != nil {
+					mlog.Println(err)
+				}
 			case a == "5":
 				fmt.Println("unsub")
 				err = cli.unsubscribeTopic()
@@ -108,6 +102,10 @@ func Start() {
 				}
 			case a == "6":
 				fmt.Println("disconnect")
+				err = cli.disconnect()
+				if err != nil {
+					mlog.Println(err)
+				}
 			}
 			continue
 		}

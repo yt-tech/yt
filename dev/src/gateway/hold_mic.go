@@ -4,13 +4,25 @@ import (
 	"yt/ytproto/msg"
 )
 
+func (y *ytClientInfo) newHoldMic(message *msg.Msg) error {
+	buff, err := y.holdMic(message)
+	if err != nil {
+		return err
+	}
+	_, err = y.commandStream.Write(buff)
+	if err != nil {
+		mlog.Println(err)
+		return err
+	}
+	return nil
+}
 func (y *ytClientInfo) holdMic(message *msg.Msg) ([]byte, error) {
 	mlog.Println("hold mic")
 	var result int32
 	mid := message.GetMid()
 	uid := message.GetUid()
 	tid := message.GetTid()
-	newHoldMic(uid, tid, &result)
+	processHoldMic(uid, tid, &result)
 	if result > 20 {
 		mlog.Printf("mid=%d uid=%d hold mic in tid=%d result=%d\n", mid, uid, tid, result)
 		return send2cliPack(message, msg.CMDID_HoldMicAck, result)
@@ -23,7 +35,7 @@ func (y *ytClientInfo) holdMic(message *msg.Msg) ([]byte, error) {
 		buff, err := send2cliPack(message, msg.CMDID_HoldMicAck, result)
 		if err == nil {
 			mlog.Println("broadcast holdmic")
-			localBroadcastPush(uid, tid, buff) //广播给当前网关的其他客户端端
+			clientDistribute(uid, tid, buff) //广播给当前网关的其他客户端端
 			mlog.Printf("mid=%d uid=%d hold mic in tid=%d result=%d\n", mid, uid, tid, result)
 			return buff, nil
 		}
@@ -34,7 +46,7 @@ func (y *ytClientInfo) holdMic(message *msg.Msg) ([]byte, error) {
 	return send2cliPack(message, msg.CMDID_HoldMicAck, result)
 }
 
-func newHoldMic(uid, tid uint32, result *int32) {
+func processHoldMic(uid, tid uint32, result *int32) {
 	topicer, isExist := localTopicBroadcast.Load(tid)
 	if !isExist {
 		*result = 21

@@ -36,7 +36,7 @@ func (y *ytClientInfo) subscribeTopic(message *msg.Msg) ([]byte, error) {
 	}
 	y.currentTopic = tid
 	y.topicPushServerAddr = pushAddr
-	localBroadcastPush(y.uid, tid, buff)
+	clientDistribute(y.uid, tid, buff)
 	return buff, nil
 }
 

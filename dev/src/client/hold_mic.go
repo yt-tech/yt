@@ -37,6 +37,20 @@ func (c *clientInfo) holdMic() error {
 		}
 		if cm.Mid == mid {
 			mlog.Println(cm)
+			switch cm.GetAckCode() {
+			case 1:
+				for it := 0; it < 2; it++ {
+					data, err := c.packAudioData()
+					if err != nil {
+						mlog.Println(err)
+						return err
+					}
+					c.quicStream.Write(data)
+					time.Sleep(12e7)
+				}
+			default:
+				mlog.Println("failed")
+			}
 		} else {
 			mlog.Println("timeout data")
 			ne, err := c.quicStream.Read(bf)
