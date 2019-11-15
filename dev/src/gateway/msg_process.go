@@ -3,6 +3,8 @@ package gateway
 import (
 	"context"
 	"net"
+	"time"
+	"yt/sharelib/timewheel"
 	"yt/ytproto/msg"
 
 	ggproto "github.com/gogo/protobuf/proto"
@@ -37,6 +39,11 @@ func process(quicSession quic.Session, tpSession tp.Session) {
 	}
 	readBuff := make([]byte, 1024)
 	var message = &msg.Msg{}
+	tw := timewheel.NewTimeWheel(time.Second, 120)
+
+	ht := "holdmic"
+	at := "audio"
+	var bi bool
 	for {
 		n, err := y.commandStream.Read(readBuff)
 		if err != nil {
@@ -68,11 +75,34 @@ func process(quicSession quic.Session, tpSession tp.Session) {
 			}
 			mlog.Printf("uid=%d tid=%d unSubscribeTopic success\n", y.uid, message.GetTid())
 		case msg.CMDID_HoldMic:
+			tw.Start()
+			//添加定时任务
+			//参数：interval 时间间隔
+			//参数：times 执行次数 -1 表示周期任务 >0 执行指定次数
+			//参数：key 任务唯一标识符 用户更新任务和删除任务
+			//参数：taskData 回调函数参数
+			//参数：job 回调函数
+			tw.AddTask(10*time.Second, 1, ht, timewheel.TaskData{"name": "john"},
+				func(params timewheel.TaskData) {
+					mlog.Println(time.Now().Unix(), params["name"], "time removeMic")
+				})
+			tw.AddTask(3*time.Second, -1, at, timewheel.TaskData{"name": bi},
+				func(params timewheel.TaskData) {
+					if !bi {
+						mlog.Println(time.Now().Unix(), params["name"], "audio removeMic")
+					}
+					bi = false
+				})
+
 			if err = y.newHoldMic(message); err != nil {
 				mlog.Printf("error=%v uid=%d tid=%d holdMic\n", err, y.uid, message.GetTid())
 			}
 			mlog.Printf("uid=%d tid=%d holdMic success\n", y.uid, message.GetTid())
 		case msg.CMDID_ReleaseMic:
+			tw.RemoveTask(ht)
+			tw.RemoveTask(at)
+			//轮盘停止
+			tw.Stop()
 			if err = y.newReleaseMic(message); err != nil {
 				mlog.Printf("error=%v uid=%d tid=%d releaseMic\n", err, y.uid, message.GetTid())
 			}
@@ -80,6 +110,7 @@ func process(quicSession quic.Session, tpSession tp.Session) {
 		case msg.CMDID_Disconnect:
 		case msg.CMDID_Audio:
 			mlog.Println("audio data")
+			bi = true
 			y.audioReceive(message)
 		case msg.CMDID_Ping:
 			// mlog.Println(message)

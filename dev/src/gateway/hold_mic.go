@@ -28,22 +28,24 @@ func (y *ytClientInfo) holdMic(message *msg.Msg) ([]byte, error) {
 		return send2cliPack(message, msg.CMDID_HoldMicAck, result)
 	}
 	if rerr := y.tpSession.Call("/manager/holdmic", message, &result).Rerror(); rerr != nil {
-		mlog.Println(rerr.String())
+		mlog.Println("call manager failed", rerr.String())
 		result = 100
 	}
-	if result == 1 {
-		buff, err := send2cliPack(message, msg.CMDID_HoldMicAck, result)
-		if err == nil {
-			mlog.Println("broadcast holdmic")
-			clientDistribute(uid, tid, buff) //广播给当前网关的其他客户端端
-			mlog.Printf("mid=%d uid=%d hold mic in tid=%d result=%d\n", mid, uid, tid, result)
-			return buff, nil
-		}
-		mlog.Printf("mid=%d uid=%d hold mic in tid=%d result=%d\n", mid, uid, tid, result)
+
+	buff, err := send2cliPack(message, msg.CMDID_HoldMicAck, result)
+	if err != nil {
+		mlog.Printf("pack error:%v", err)
 		return nil, err
 	}
-	mlog.Printf("mid=%d uid=%d hold mic in tid=%d result=%d\n", mid, uid, tid, result)
-	return send2cliPack(message, msg.CMDID_HoldMicAck, result)
+	// 抢麦成功
+	if result == 1 {
+		mlog.Println("broadcast command to other holdmic")
+		clientDistribute(uid, tid, buff) //广播给当前网关的其他客户端端
+		mlog.Printf("mid=%d uid=%d hold mic in tid=%d success result=%d\n", mid, uid, tid, result)
+		return buff, nil
+	}
+	mlog.Printf("mid=%d uid=%d hold mic in tid=%d failed result=%d\n", mid, uid, tid, result)
+	return buff, nil
 }
 
 func processHoldMic(uid, tid uint32, result *int32) {

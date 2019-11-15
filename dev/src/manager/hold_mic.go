@@ -11,15 +11,12 @@ func (m *Manager) Holdmic(ytmsg *msg.Msg) (result int32, terr *tp.Rerror) {
 	uid := ytmsg.GetUid()
 	tid := ytmsg.GetTid()
 	mlog.Printf("uid=%d hold mic in tid=%d\n", uid, tid)
-	topicer, isEsixt := topics.Load(tid)
-	if isEsixt {
-		topic, ok := topicer.(*topicInfo)
-		if ok {
+	if topicer, isEsixt := topics.Load(tid); isEsixt {
+		if topic, ok := topicer.(*topicInfo); ok {
 			topic.Lock()
 			if topic.holder == 0 || topic.holder == uid {
 				topic.holder = uid
 				result = 1
-
 				//给相关网关广播
 				cmdBroadcast(topic.gateways, ytmsg)
 			} else {

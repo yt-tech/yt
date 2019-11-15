@@ -13,6 +13,7 @@ require (
 	github.com/json-iterator/go v1.1.7
 	github.com/lucas-clemente/quic-go v0.12.0
 	github.com/natefinch/lumberjack v2.0.0+incompatible
+	github.com/nosixtools/timewheel v1.3.0
 	github.com/pelletier/go-toml v1.4.0
 	github.com/smallnest/rpcx v0.0.0-20190920111107-cc22806312fd
 	github.com/tidwall/gjson v1.3.2 // indirect

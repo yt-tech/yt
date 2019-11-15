@@ -59,6 +59,8 @@ func getGWSession(gwid string) (tp.Session, *tp.Rerror) {
 	}
 	return gwSession, nil
 }
+
+//command broadcast
 func cmdBroadcast(tg map[string]tp.Session, ytmsg *msg.Msg) {
 	for k, v := range tg {
 		mlog.Println(k, v)
