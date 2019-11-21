@@ -44,6 +44,7 @@ func process(quicSession quic.Session, tpSession tp.Session) {
 	ht := "holdmic"
 	at := "audio"
 	var bi bool
+	var timewheelStatus bool
 	for {
 		n, err := y.commandStream.Read(readBuff)
 		if err != nil {
@@ -76,6 +77,7 @@ func process(quicSession quic.Session, tpSession tp.Session) {
 			mlog.Printf("uid=%d tid=%d unSubscribeTopic success\n", y.uid, message.GetTid())
 		case msg.CMDID_HoldMic:
 			tw.Start()
+			timewheelStatus = true
 			//添加定时任务
 			//参数：interval 时间间隔
 			//参数：times 执行次数 -1 表示周期任务 >0 执行指定次数
@@ -85,11 +87,19 @@ func process(quicSession quic.Session, tpSession tp.Session) {
 			tw.AddTask(10*time.Second, 1, ht, timewheel.TaskData{"name": "john"},
 				func(params timewheel.TaskData) {
 					mlog.Println(time.Now().Unix(), params["name"], "time removeMic")
+					if timewheelStatus == true {
+						timewheelStatus = false
+						tw.Stop()
+					}
 				})
 			tw.AddTask(3*time.Second, -1, at, timewheel.TaskData{"name": bi},
 				func(params timewheel.TaskData) {
 					if !bi {
 						mlog.Println(time.Now().Unix(), params["name"], "audio removeMic")
+						if timewheelStatus == true {
+							timewheelStatus = false
+							tw.Stop()
+						}
 					}
 					bi = false
 				})
@@ -99,10 +109,10 @@ func process(quicSession quic.Session, tpSession tp.Session) {
 			}
 			mlog.Printf("uid=%d tid=%d holdMic success\n", y.uid, message.GetTid())
 		case msg.CMDID_ReleaseMic:
-			tw.RemoveTask(ht)
-			tw.RemoveTask(at)
 			//轮盘停止
-			tw.Stop()
+			if timewheelStatus == true {
+				tw.Stop()
+			}
 			if err = y.newReleaseMic(message); err != nil {
 				mlog.Printf("error=%v uid=%d tid=%d releaseMic\n", err, y.uid, message.GetTid())
 			}

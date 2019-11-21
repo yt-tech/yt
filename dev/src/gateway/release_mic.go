@@ -19,7 +19,7 @@ func (y *ytClientInfo) newReleaseMic(message *msg.Msg) error {
 }
 
 func (y *ytClientInfo) releaseMic(message *msg.Msg) ([]byte, error) {
-	mlog.Println("hold mic")
+	mlog.Println("release mic")
 	var result int32
 	uid := message.GetUid()
 	tid := message.GetTid()

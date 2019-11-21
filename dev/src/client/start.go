@@ -20,7 +20,8 @@ var outDataChannel = make(chan []byte, 100)
 
 //Start ..
 func Start() {
-	cli := newClient(4, 1)
+	var setUID = uint32(4)
+	cli := newClient(setUID, 1)
 	// gatewayAddr = getDisp()
 	mlog.Println(gatewayAddr)
 	cli.openQuic()
@@ -30,7 +31,7 @@ func Start() {
 		tike := time.NewTicker(20e9)
 		cm := &msg.Msg{
 			CmdID: msg.CMDID_Ping,
-			Uid:   9,
+			Uid:   setUID,
 		}
 		pingBytes, _ := ggproto.Marshal(cm)
 		for {

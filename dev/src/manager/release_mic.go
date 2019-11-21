@@ -6,8 +6,8 @@ import (
 	tp "github.com/henrylee2cn/teleport"
 )
 
-//Subscribetopic ..
-func (m *Manager) releasemic(ytmsg *msg.Msg) (result int32, terr *tp.Rerror) {
+//Releasemic ..
+func (m *Manager) Releasemic(ytmsg *msg.Msg) (result int32, terr *tp.Rerror) {
 	mlog.Println("release mic")
 	uid := ytmsg.GetUid()
 	tid := ytmsg.GetTid()

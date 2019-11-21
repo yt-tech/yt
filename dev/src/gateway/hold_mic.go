@@ -4,6 +4,9 @@ import (
 	"yt/ytproto/msg"
 )
 
+type localTopicInfo struct {
+}
+
 func (y *ytClientInfo) newHoldMic(message *msg.Msg) error {
 	buff, err := y.holdMic(message)
 	if err != nil {

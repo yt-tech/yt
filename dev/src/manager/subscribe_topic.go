@@ -1,6 +1,9 @@
 package manager
 
 import (
+	"database/sql"
+	"fmt"
+	"log"
 	"yt/ytproto/msg"
 
 	tp "github.com/henrylee2cn/teleport"
@@ -8,6 +11,9 @@ import (
 
 //Subscribetopic ..
 func (m *Manager) Subscribetopic(ytmsg *msg.Msg) (result int32, terr *tp.Rerror) {
+	if queryDB() {
+		fmt.Println("select db")
+	}
 	gwID := m.Session().ID()
 	mlog.Println("Subscribe Topic Request ", gwID)
 	gwSession, rerr := getGWSession(gwID)
@@ -25,11 +31,11 @@ func (m *Manager) Subscribetopic(ytmsg *msg.Msg) (result int32, terr *tp.Rerror)
 		return 1, nil
 	}
 	topic, ok := topicer.(*topicInfo)
-	if ok {
-		topic.addrNewMember(tid, uid, gwID, gwSession, ytmsg)
-		return 2, nil
+	if !ok {
+		return 0, tp.NewRerror(11, "断言失败", "")
 	}
-	return 0, tp.NewRerror(11, "断言失败", "")
+	topic.addrNewMember(tid, uid, gwID, gwSession, ytmsg)
+	return 2, nil
 }
 func newCreateTopic(tid, uid uint32, gwID string, gwSession tp.Session) {
 	topic := &topicInfo{
@@ -66,4 +72,20 @@ func cmdBroadcast(tg map[string]tp.Session, ytmsg *msg.Msg) {
 		mlog.Println(k, v)
 		broadcast(v, ytmsg)
 	}
+}
+
+func queryDB() bool {
+	connStr := "port=5433 dbname=yt user=postgres password=postgres "
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var a, b, c int
+	rows, err := db.Query("SELECT * FROM yt_user_and_topic WHERE id = $1 and uid=$2", 1, 2)
+	fmt.Println(rows, err)
+	for rows.Next() {
+		rows.Scan(&a, &b, &c)
+		fmt.Println(a, b, c)
+	}
+	return true
 }
