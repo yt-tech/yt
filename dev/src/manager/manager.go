@@ -15,8 +15,18 @@ var (
 type topicInfo struct {
 	sync.RWMutex
 	gateways map[string]tp.Session
-	users    map[uint32]bool
-	holder   uint32
+	users    map[uint32]*userInfo
+	micHolder
+}
+type userInfo struct {
+	name     string
+	role     uint8
+	stauts   bool
+	priority uint8
+}
+type micHolder struct {
+	uid      uint32
+	priority uint8
 }
 
 //Manager ..

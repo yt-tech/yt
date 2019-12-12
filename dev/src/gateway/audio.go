@@ -25,7 +25,7 @@ func broadcastAudio(m *msg.Msg) {
 	buff, _ := m.Marshal()
 	ts := tstreamer.(*usersOfTopic)
 	ts.RLock()
-	for _, v := range ts.users {
+	for _, v := range ts.usersBroadcastStream {
 		_, err := v.Write(buff)
 		if err != nil {
 			mlog.Println(err)

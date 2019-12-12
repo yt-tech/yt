@@ -3,32 +3,38 @@ syntax = "proto3";
 package  msg;
 
 enum CMDID {
-    UNKNOWN               = 0;
-    Connect               = 1;
-    ConnectAck            = 2;
-    SubscribeTopic        = 3;
-    SubscribeTopicAck     = 4;
-    UnsubscribeTopic      = 5;
-    UnsubscribeTopicAck   = 6;
-    HoldMic               = 7;
-    HoldMicAck            = 8;
-    ReleaseMic            = 9;
-    ReleaseMicAck         =10;
-    Disconnect            =11;
-    DisConnectAck         =12;
-    Audio                 =13;
-    Ping                  =14;
-    Pong                  =15;
+    UNKNOWN                   = 0;
+    SignIn                    = 1;
+    SignInAck                 = 2;
+    SubscribeTopic            = 3;
+    SubscribeTopicAck         = 4;
+    UnsubscribeTopic          = 5;
+    UnsubscribeTopicAck       = 6;
+    HoldMic                   = 7;
+    HoldMicAck                = 8;
+    ReleaseMic                = 9;
+    ReleaseMicAck             =10;
+    SignOut                   =11;
+    SignOutAck                =12;
+    Audio                     =13;
+    Ping                      =14;
+    Pong                      =15;
+    RemoveMic                 =16;
+    RemoveMicAck              =17;
+    CreateTemporaryGroup      =18;
+    CreateTemporaryGroupAck   =19;
+    PullGroupNotice           =20;
+    PullGroupNoticeAck        =21;
 }
 
 message Msg {
-    sint32      version      = 1;
     uint32      mid          = 2;
     CMDID       cmdID        = 3;
     uint32      uid          = 4;
     uint32      tid          = 5;
     AudioData   audioData    = 6;
     sint32      ackCode      = 7;
+    string      token        = 8;
 }
 
 message AudioData {

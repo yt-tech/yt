@@ -25,7 +25,7 @@ func (m *Manager) Unsubscribetopic(requestMsg *msg.Msg) (result int32, terr *tp.
 	if isEsixt {
 		if topic, ok = topicer.(*topicInfo); ok {
 			topic.Lock()
-			topic.users[uid] = true
+			topic.users[uid].stauts = false
 			mlog.Println(topic.gateways)
 			for k, v := range topic.gateways {
 				mlog.Println(k, v)
@@ -39,11 +39,11 @@ func (m *Manager) Unsubscribetopic(requestMsg *msg.Msg) (result int32, terr *tp.
 		return 0, tp.NewRerror(11, "断言失败", "")
 	}
 	topic = &topicInfo{
-		users:    make(map[uint32]bool, 20),
+		users:    make(map[uint32]*userInfo, 20),
 		gateways: make(map[string]tp.Session, 5),
 	}
 	topic.gateways[gwID] = gwSession
-	topic.users[uid] = true
+	topic.users[uid].stauts = false
 	topics.Store(tid, topic)
 	return 1, nil
 }

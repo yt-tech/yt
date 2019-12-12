@@ -44,8 +44,8 @@ func processReleaseMic(uid, tid uint32, r *int32) int32 {
 		return 103
 	}
 	topic.Lock()
-	if topic.holder == 0 || topic.holder == uid {
-		topic.holder = 0
+	if topic.micHolder == 0 || topic.micHolder == uid {
+		topic.micHolder = 0
 		*r = 1
 	}
 	topic.Unlock()

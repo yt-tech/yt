@@ -21,7 +21,7 @@ func (g *gateway) disconnectRequest(rpcsess tp.Session, sess quic.Session, strea
 		return err
 	}
 	mlog.Println("broadcastWriteStream ID", broadcastStream.StreamID())
-	buff, err := send2cliPack(message, msg.CMDID_DisConnectAck, result)
+	buff, err := send2cliPack(message, msg.CMDID_SignOutAck, result)
 	if err != nil {
 		mlog.Println(err)
 		return err
@@ -43,7 +43,7 @@ func (y *ytClientInfo) closenet() {
 			t, _ := localTopicBroadcast.Load(y.currentTopic)
 			tt := t.(*usersOfTopic)
 			tt.Lock()
-			delete(tt.users, uu)
+			delete(tt.usersBroadcastStream, uu)
 			tt.Unlock()
 		}
 	}

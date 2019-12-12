@@ -19,3 +19,10 @@ func (m *Manager) Connect(ytmsg *msg.Msg) (result int32, err *tp.Rerror) {
 	}
 	return 1, nil
 }
+func synchSingleAccountData() {
+	err := redisdb.Set("key", "value", 0).Err()
+	if err != nil {
+		panic(err)
+	}
+
+}

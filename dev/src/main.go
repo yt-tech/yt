@@ -8,6 +8,7 @@ import (
 	"yt/gateway"
 	"yt/manager"
 	"yt/push"
+	"yt/useroauth2"
 )
 
 func main() {
@@ -30,6 +31,8 @@ func main() {
 	case "d": //disp
 		fmt.Println("start disp")
 		disp.StartDisp()
+	case "o":
+		useroauth2.Oauth2()
 	default:
 		panic("-----")
 	}

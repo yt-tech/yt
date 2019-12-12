@@ -49,7 +49,7 @@ func (y *ytClientInfo) deleteBroadcastStream(tid uint32, r int32) int32 {
 		return 103
 	}
 	topic.Lock()
-	topic.users[y.uid] = nil
+	topic.usersBroadcastStream[y.uid] = nil
 	topic.Unlock()
 	return r
 }

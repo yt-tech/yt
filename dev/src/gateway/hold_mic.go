@@ -21,11 +21,10 @@ func (y *ytClientInfo) newHoldMic(message *msg.Msg) error {
 }
 func (y *ytClientInfo) holdMic(message *msg.Msg) ([]byte, error) {
 	mlog.Println("hold mic")
-	var result int32
 	mid := message.GetMid()
 	uid := message.GetUid()
 	tid := message.GetTid()
-	processHoldMic(uid, tid, &result)
+	result := processHoldMic(uid, tid)
 	if result > 20 {
 		mlog.Printf("mid=%d uid=%d hold mic in tid=%d result=%d\n", mid, uid, tid, result)
 		return send2cliPack(message, msg.CMDID_HoldMicAck, result)
@@ -43,7 +42,7 @@ func (y *ytClientInfo) holdMic(message *msg.Msg) ([]byte, error) {
 	// 抢麦成功
 	if result == 1 {
 		mlog.Println("broadcast command to other holdmic")
-		clientDistribute(uid, tid, buff) //广播给当前网关的其他客户端端
+		// clientDistribute(uid, tid, buff) //广播给当前网关的其他客户端端
 		mlog.Printf("mid=%d uid=%d hold mic in tid=%d success result=%d\n", mid, uid, tid, result)
 		return buff, nil
 	}
@@ -51,23 +50,21 @@ func (y *ytClientInfo) holdMic(message *msg.Msg) ([]byte, error) {
 	return buff, nil
 }
 
-func processHoldMic(uid, tid uint32, result *int32) {
+func processHoldMic(uid, tid uint32) (result int32) {
 	topicer, isExist := localTopicBroadcast.Load(tid)
 	if !isExist {
-		*result = 21
-		return
+		return 21
 	}
 	topic, ok := topicer.(*usersOfTopic)
 	if !ok {
-		*result = 22
-		return
+		return 22
 	}
 	topic.Lock()
-	if topic.holder == 0 || topic.holder == uid {
-		topic.holder = uid
-		*result = 1
-	} else {
-		*result = 21
+	if topic.micHolder != 0 && topic.micHolder != uid {
+		result = 23
 	}
+	topic.micHolder = uid
+	result = 1
 	topic.Unlock()
+	return result
 }

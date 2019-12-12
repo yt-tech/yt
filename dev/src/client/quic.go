@@ -13,7 +13,7 @@ func (c *clientInfo) openQuic() {
 		mlog.Println(err)
 	}
 	quicStream, _ := session.OpenStreamSync(context.Background())
-	c.session = session
+	c.quicSession = session
 	c.quicStream = quicStream
 	if err != nil {
 		mlog.Println(err)

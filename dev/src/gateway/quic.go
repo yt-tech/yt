@@ -44,7 +44,7 @@ func quicServer() {
 		if err != nil {
 			mlog.Println(err)
 			newClientSession.Close()
-			break
+			continue
 		}
 		go process(newClientSession, rpcsess)
 	}

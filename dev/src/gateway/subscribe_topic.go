@@ -6,17 +6,18 @@ import (
 	"github.com/lucas-clemente/quic-go"
 )
 
-func (y *ytClientInfo) newSubscribeTopic(message *msg.Msg) error {
+func (y *ytClientInfo) newSubscribeTopic(message *msg.Msg) {
 	buff, err := y.subscribeTopic(message)
 	if err != nil {
-		return err
+		mlog.Println(err)
+		return
 	}
 	_, err = y.commandStream.Write(buff)
 	if err != nil {
 		mlog.Println(err)
-		return err
+		return
 	}
-	return nil
+	mlog.Printf("uid=%d tid=%d subscribeTopic success\n", y.uid, message.GetTid())
 }
 func (y *ytClientInfo) subscribeTopic(message *msg.Msg) ([]byte, error) {
 	mlog.Println(message)
@@ -36,7 +37,7 @@ func (y *ytClientInfo) subscribeTopic(message *msg.Msg) ([]byte, error) {
 	}
 	y.currentTopic = tid
 	y.topicPushServerAddr = pushAddr
-	clientDistribute(y.uid, tid, buff)
+	// clientDistribute(y.uid, tid, buff)
 	return buff, nil
 }
 
@@ -46,11 +47,11 @@ func (y *ytClientInfo) preStorageTopicBroadcastStream(tid uint32, r *int32) {
 	topicer, isExist := localTopicBroadcast.Load(tid)
 	if !isExist {
 		newTopic := &usersOfTopic{
-			users: make(map[uint32]quic.SendStream, 10),
+			usersBroadcastStream: make(map[uint32]quic.SendStream, 10),
 		}
-		newTopic.users[y.uid] = y.broadcastStream
+		newTopic.usersBroadcastStream[y.uid] = y.broadcastStream
 		localTopicBroadcast.Store(tid, newTopic)
-		*r = 12
+		*r = 1
 		return
 	}
 	topic, ok := topicer.(*usersOfTopic)
@@ -59,7 +60,7 @@ func (y *ytClientInfo) preStorageTopicBroadcastStream(tid uint32, r *int32) {
 		return
 	}
 	topic.Lock()
-	topic.users[y.uid] = y.broadcastStream
+	topic.usersBroadcastStream[y.uid] = y.broadcastStream
 	topic.Unlock()
 	// localTopicBroadcast.Store(tid, topic)
 	// tmp

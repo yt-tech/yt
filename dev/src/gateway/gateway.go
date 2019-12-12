@@ -18,8 +18,8 @@ type gateway struct{}
 
 type usersOfTopic struct {
 	sync.RWMutex
-	users  map[uint32]quic.SendStream
-	holder uint32
+	usersBroadcastStream map[uint32]quic.SendStream
+	micHolder            uint32
 }
 
 func send2cliPack(message *msg.Msg, cid msg.CMDID, result int32) ([]byte, error) {

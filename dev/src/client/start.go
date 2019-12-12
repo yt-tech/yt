@@ -13,17 +13,22 @@ import (
 	ggproto "github.com/gogo/protobuf/proto"
 )
 
-var gatewayAddr string
 var mlog = log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile)
-var inDataChannel = make(chan []byte, 100)
-var outDataChannel = make(chan []byte, 100)
+
+// var inDataChannel = make(chan []byte, 100)
+// var outDataChannel = make(chan []byte, 100)
 
 //Start ..
 func Start() {
-	var setUID = uint32(4)
-	cli := newClient(setUID, 1)
-	// gatewayAddr = getDisp()
+	var setUID = uint32(1)
+	var userIn = requestDisp{
+		user:   "user1",
+		passwd: "abc",
+	}
+	gatewayAddr := userIn.getDisp()
 	mlog.Println(gatewayAddr)
+	NewClient(setUID, 1, gatewayAddr.AccessToken)
+	cli := client
 	cli.openQuic()
 	// time.Sleep(1e9)
 	// logger.Debug("start zap log")
@@ -41,7 +46,9 @@ func Start() {
 			}
 		}
 	}()
-
+	go client.cmdRecieve()
+	go client.handle()
+	go client.cmdSend()
 	for {
 		f := bufio.NewReader(os.Stdin) //读取输入的内容
 		fmt.Print("请输入命令->")
@@ -57,56 +64,20 @@ func Start() {
 		c1 := strings.Contains(Input, "cmd")
 		a := Input[4:5]
 		if c1 {
-			switch {
-			case a == "1":
-				go func() {
-					recv, _ := cli.session.AcceptUniStream(context.Background())
-					ba := make([]byte, 1024)
-					for {
-						n, err := recv.Read(ba)
-						if err != nil {
-							os.Exit(10)
-						}
-						mlog.Println(ba[:n], err)
-					}
-				}()
-				fmt.Println("connect")
-				err = cli.connect()
-				if err != nil {
-					mlog.Println(err)
-				}
-
-			case a == "2":
-				fmt.Println("sub")
-				err = cli.subscribeTopic()
-				if err != nil {
-					mlog.Println(err)
-				}
-			case a == "3":
-				fmt.Println("hold mic")
-				err = cli.holdMic()
-				if err != nil {
-					mlog.Println(err)
-				}
-
-			case a == "4":
-				fmt.Println("release mic")
-				err = cli.releaseMic()
-				if err != nil {
-					mlog.Println(err)
-				}
-			case a == "5":
-				fmt.Println("unsub")
-				err = cli.unsubscribeTopic()
-				if err != nil {
-					mlog.Println(err)
-				}
-			case a == "6":
-				fmt.Println("disconnect")
-				err = cli.disconnect()
-				if err != nil {
-					mlog.Println(err)
-				}
+			switch a {
+			case "1":
+				createLocalRevieveBroadcast()
+				mlog.Println("SignIn", SignIn())
+			case "2":
+				mlog.Println("SubscribeTopic", SubscribeTopic())
+			case "3":
+				mlog.Println("holdMic", HoldMic())
+			case "4":
+				mlog.Println("releaseMic", ReleaseMic())
+			case "5":
+				mlog.Println("unsubsricbeTopic", UnsubscribeTopic())
+			case "6":
+				mlog.Println("signOut", SignOut())
 			}
 			continue
 		}
@@ -114,4 +85,46 @@ func Start() {
 		fmt.Println("输入错误！ 请重新输入")
 		continue
 	}
+}
+
+func createLocalRevieveBroadcast() {
+	var ms = msg.Msg{}
+	go func() {
+		recv, err := client.quicSession.AcceptUniStream(context.Background())
+		if err != nil {
+			mlog.Println(err)
+		}
+		ba := make([]byte, 1024)
+		for {
+			n, err := recv.Read(ba)
+			if err != nil {
+				mlog.Println(err)
+				continue
+			}
+
+			err = ggproto.Unmarshal(ba[:n], &ms)
+			if err != nil {
+				mlog.Println(err)
+				continue
+			}
+			switch ms.GetCmdID() {
+			case msg.CMDID_SignInAck:
+				mlog.Println(ms)
+			case msg.CMDID_SignOutAck:
+				mlog.Println(ms)
+			case msg.CMDID_SubscribeTopicAck:
+				mlog.Println(ms)
+			case msg.CMDID_UnsubscribeTopicAck:
+				mlog.Println(ms)
+			case msg.CMDID_HoldMicAck:
+				mlog.Println(ms)
+			case msg.CMDID_ReleaseMicAck:
+				mlog.Println(ms)
+			case msg.CMDID_RemoveMicAck:
+				mlog.Println(ms)
+			case msg.CMDID_Audio:
+				mlog.Println(ms)
+			}
+		}
+	}()
 }

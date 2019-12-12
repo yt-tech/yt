@@ -1,0 +1,32 @@
+package client
+
+//Connect ..
+func Connect() {
+
+}
+
+// func packConnectData(cli clientInfo) ([]byte, error) {
+// 	mid := getRangNumber()
+// 	cmdMsg := &msg.Msg{
+// 		Mid:   mid,
+// 		CmdID: msg.CMDID_Connect,
+// 		Uid:   cli.uid,
+// 	}
+
+// 	return cmdMarsal(cmdMsg)
+// }
+
+func (c *clientInfo) connect() error {
+	data, err := packConnectData(*c)
+	if err != nil {
+		mlog.Println(err)
+		return err
+	}
+
+	_, err = c.quicStream.Write(data)
+	if err != nil {
+		mlog.Println(err)
+		return err
+	}
+	return nil
+}

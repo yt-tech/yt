@@ -6,17 +6,18 @@ import (
 	"log"
 	"yt/ytproto/msg"
 
+	"github.com/go-redis/redis"
+
 	tp "github.com/henrylee2cn/teleport"
 )
 
 //Subscribetopic ..
 func (m *Manager) Subscribetopic(ytmsg *msg.Msg) (result int32, terr *tp.Rerror) {
-	if queryDB() {
-		fmt.Println("select db")
-	}
+
 	gwID := m.Session().ID()
 	mlog.Println("Subscribe Topic Request ", gwID)
 	gwSession, rerr := getGWSession(gwID)
+	mlog.Println("||||||||||||++++++++++")
 	if rerr != nil {
 		return 100, rerr
 	}
@@ -26,7 +27,19 @@ func (m *Manager) Subscribetopic(ytmsg *msg.Msg) (result int32, terr *tp.Rerror)
 	var topic *topicInfo
 	topicer, isEsixt := topics.Load(tid)
 
+	//manager 无此topic
 	if !isEsixt {
+		mlog.Println("the topic had not cache")
+		allow := topicAllow(tid)
+		if !allow {
+			mlog.Println("can not create the topic")
+			return 101, nil
+		}
+		userAllow := queryUserOfTopicInfoFromRedis(uid, tid)
+		if !userAllow {
+			mlog.Println("the user has not auth for the topic")
+			return 102, nil
+		}
 		newCreateTopic(tid, uid, gwID, gwSession)
 		return 1, nil
 	}
@@ -34,21 +47,28 @@ func (m *Manager) Subscribetopic(ytmsg *msg.Msg) (result int32, terr *tp.Rerror)
 	if !ok {
 		return 0, tp.NewRerror(11, "断言失败", "")
 	}
+	userAllow := queryUserOfTopicInfoFromRedis(uid, tid)
+	if !userAllow {
+		return 103, nil
+	}
 	topic.addrNewMember(tid, uid, gwID, gwSession, ytmsg)
 	return 2, nil
 }
+func initUserInfo() *userInfo {
+	return &userInfo{}
+}
 func newCreateTopic(tid, uid uint32, gwID string, gwSession tp.Session) {
 	topic := &topicInfo{
-		users:    make(map[uint32]bool, 20),
+		users:    make(map[uint32]*userInfo, 20),
 		gateways: make(map[string]tp.Session, 5),
 	}
 	topic.gateways[gwID] = gwSession
-	topic.users[uid] = true
+	topic.users[uid] = initUserInfo()
 	topics.Store(tid, topic)
 }
 func (t *topicInfo) addrNewMember(tid, uid uint32, gwID string, gwSession tp.Session, ytmsg *msg.Msg) {
 	t.Lock()
-	t.users[uid] = true
+	t.users[uid] = initUserInfo()
 	t.gateways[gwID] = gwSession
 	cmdBroadcast(t.gateways, ytmsg)
 	t.Unlock()
@@ -86,6 +106,31 @@ func queryDB() bool {
 	for rows.Next() {
 		rows.Scan(&a, &b, &c)
 		fmt.Println(a, b, c)
+	}
+	return true
+}
+func topicAllow(tid uint32) bool {
+	topicFromDB, err := queryTopicInfoFromRedis(tid)
+	if err == redis.Nil {
+		mlog.Println("redis has not the topic")
+		topicFromDB, err = queryTopicInfoFromPQDB(tid)
+		if err != nil {
+			mlog.Println(err)
+			return false
+		}
+		err = updateNewTopicInfoToRedis(tid, topicFromDB)
+		if err != nil {
+			mlog.Println(err)
+			return false
+		}
+		err = updateUsersOfTopicInfoToRedis(tid)
+		if err != nil {
+			mlog.Println(err)
+			return false
+		}
+	} else if err != nil {
+		mlog.Println(err)
+		return false
 	}
 	return true
 }
