@@ -120,7 +120,7 @@ func process(quicSession quic.Session, tpSession tp.Session) {
 		case msg.CMDID_Ping:
 			// mlog.Println(message)
 		default:
-			mlog.Println("--------")
+			mlog.Println("--------", message)
 		}
 	}
 

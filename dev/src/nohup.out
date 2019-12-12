@@ -88,3 +88,7 @@ disp 2019/12/11 12:10:07 disp.go:44: {user1 abc}
 disp 2019/12/11 12:10:07 disp.go:49: {d01 2019-12-11 12:10:07 0 123.123.123.123:1231 8BOAHISANRQMDO0TLTZ8JW 7200 read Bearer}
 disp 2019/12/11 12:24:58 disp.go:44: {user1 abc}
 disp 2019/12/11 12:24:58 disp.go:49: {d01 2019-12-11 12:24:58 0 123.123.123.123:1231 O2SU-DUYPZ-ESYO-YCWHQW 7200 read Bearer}
+disp 2019/12/12 14:21:56 disp.go:44: {user1 abc}
+disp 2019/12/12 14:21:56 disp.go:49: {d01 2019-12-12 14:21:56 0 123.123.123.123:1231 CHCIGTPKPU6QO-XF1FXBGG 7200 read Bearer}
+2019-12-12 14:24:02.849 5239: server shutting down by signal: terminated
+2019-12-12 14:24:02.849 5239: all servers shutdown

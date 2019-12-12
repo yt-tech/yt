@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 	"yt/ytproto/msg"
@@ -20,14 +21,17 @@ var mlog = log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile)
 
 //Start ..
 func Start() {
-	var setUID = uint32(1)
 	var userIn = requestDisp{
 		user:   "user1",
 		passwd: "abc",
 	}
-	gatewayAddr := userIn.getDisp()
-	mlog.Println(gatewayAddr)
-	NewClient(setUID, 1, gatewayAddr.AccessToken)
+	d := userIn.getDisp()
+	uid, err := strconv.ParseUint(d.UserID, 10, 32)
+	if err != nil {
+		mlog.Println(err)
+	}
+	mlog.Println(d)
+	NewClient(uint32(uid), 1, d.AccessToken)
 	cli := client
 	cli.openQuic()
 	// time.Sleep(1e9)
@@ -36,7 +40,7 @@ func Start() {
 		tike := time.NewTicker(20e9)
 		cm := &msg.Msg{
 			CmdID: msg.CMDID_Ping,
-			Uid:   setUID,
+			Uid:   cli.uid,
 		}
 		pingBytes, _ := ggproto.Marshal(cm)
 		for {
@@ -120,9 +124,11 @@ func createLocalRevieveBroadcast() {
 				mlog.Println(ms)
 			case msg.CMDID_ReleaseMicAck:
 				mlog.Println(ms)
-			case msg.CMDID_RemoveMicAck:
+			case msg.CMDID_RemoveMic:
 				mlog.Println(ms)
 			case msg.CMDID_Audio:
+				mlog.Println(ms)
+			default:
 				mlog.Println(ms)
 			}
 		}

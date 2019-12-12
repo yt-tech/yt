@@ -6,6 +6,7 @@ import (
 )
 
 type dispResponse struct {
+	UserID      string `json:"user_id"`
 	RemoteInfo  string `json:"remote_info"`
 	RsqTime     string `json:"response_time"`
 	ReturnCode  uint8  `json:"return_code"`

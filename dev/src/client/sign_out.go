@@ -15,7 +15,7 @@ func (c *clientInfo) signOut() *baseToken {
 	mid := getRangNumber()
 	m := &msg.Msg{
 		Mid:   mid,
-		CmdID: msg.CMDID_Disconnect,
+		CmdID: msg.CMDID_SignOutAck,
 		Uid:   c.uid,
 	}
 	btoken := newBaseToken()

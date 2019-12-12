@@ -15,6 +15,7 @@ var mlog = log.New(os.Stdout, "disp ", log.LstdFlags|log.Lshortfile)
 const dispAddr = 9001
 
 type dispResponse struct {
+	UserID      string `json:"user_id"`
 	RemoteInfo  string `json:"remote_info"`
 	RsqTime     string `json:"response_time"`
 	ReturnCode  uint8  `json:"return_code"`
@@ -42,7 +43,7 @@ func StartDisp() {
 			password:    r.GetString("passwd"),
 		}
 		mlog.Println(requestUserInfo)
-		rc := queryUser(requestUserInfo)
+		rc, uid := queryUser(requestUserInfo)
 		switch rc {
 		case 1:
 			responseInfo.AccessToken, responseInfo.ExpiresIn, responseInfo.Scope, responseInfo.TokenType = requestOauth2()
@@ -50,6 +51,7 @@ func StartDisp() {
 		default:
 			mlog.Println(responseInfo, rc)
 		}
+		responseInfo.UserID = uid
 		responseInfo.ReturnCode = rc
 		buff, err := jsoniter.Marshal(responseInfo)
 		if err != nil {
